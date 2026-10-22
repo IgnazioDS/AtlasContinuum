@@ -36,10 +36,15 @@ as Mapster or Leatrix Maps during the first smoke test.
 ```sh
 make check
 make package
+make install
 ```
 
 The package is written to `dist/` and contains an installable `OpenMap/`
-folder. See [`docs/RESEARCH.md`](docs/RESEARCH.md) for the technical model and
+folder. `make install` creates a development symlink in the locally detected
+Retail client; pass `RETAIL_DIR="/path/to/_retail_"` to select one explicitly.
+It refuses to replace an existing `AddOns/OpenMap` installation.
+
+See [`docs/RESEARCH.md`](docs/RESEARCH.md) for the technical model and
 [`docs/PLAN.md`](docs/PLAN.md) for the delivery roadmap.
 
 ## Useful commands
