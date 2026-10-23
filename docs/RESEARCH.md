@@ -70,6 +70,10 @@ Important implementation files:
   remains above surface minimap terrain.
 - Questie-backed townsfolk are disabled on Retail; Retail uses its native pin
   ecosystem instead.
+- Blizzard's active quest and quest-blob providers both key their output to the
+  map canvas's current `uiMapID`. Atlas Continuum can safely project missing
+  point markers into stitched world coordinates; cross-zone objective-area
+  blobs need their own projected renderer and remain a separate milestone.
 - The generated data is tied to a client build. New patches, phased maps, new
   continents, or changed art IDs require regeneration and visual validation.
 

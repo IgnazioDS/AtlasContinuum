@@ -11,6 +11,20 @@
   renders only missing ongoing quests.
 - Added a mocked Retail behavior test for filtering, projection, rendering, and
   quest super-tracking.
+- Added Retail Quest Layer 2.0 marker states, watched/super-tracked emphasis,
+  objective progress, richer tooltips, configurable sizing, tracked-only mode,
+  and refresh coverage for the full active-quest lifecycle.
+
+## Next quest-layer increment
+
+- Investigate rendering Blizzard quest objective areas for non-host zones.
+  Blizzard's blob provider is bound to the map canvas's current `uiMapID`, so
+  this requires a separate projected renderer rather than reusing its single
+  native blob pin blindly.
+- Add an in-game diagnostic that reports why an active quest could not be
+  projected: missing waypoint, unstitched map, secret value, or native pin.
+- Evaluate campaign/important/recurring visual treatments without diverging
+  from Blizzard's current POI language.
 
 ## Release gate 1 — in-game quest verification
 

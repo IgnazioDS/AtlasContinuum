@@ -28,8 +28,10 @@ Features:
 
 - Seamless world-to-zone zoom and cross-zone panning.
 - Detailed Retail zone, city, cave, and dungeon views.
-- Missing active quest positions across visible zones.
-- Click a bridged quest marker to super-track it.
+- Missing active quest positions across visible zones, with watched, ready,
+  failed, disabled, and super-tracked visual states.
+- Objective progress, richer tooltips, click-to-super-track, marker sizing,
+  and an optional tracked-only mode.
 - Blizzard quest log and map controls remain in their normal frame.
 - Dungeon entrances, flight masters, boats, zeppelins, routes, map pins, and
   drawing tools.
@@ -71,7 +73,7 @@ Continuum is not affiliated with or endorsed by Blizzard.
 - Test login, `/reload`, windowed/full-screen map, zoom, pan, quest progress,
   quest turn-in, super-tracking, city alignment, and saved settings.
 - Test with no other addons, then with common pin providers.
-- Upload `dist/AtlasContinuum-0.2.0-beta.1.zip` as a Beta file.
+- Upload `dist/AtlasContinuum-0.3.0-beta.1.zip` as a Beta file.
 - Publish the source and `NOTICE.md` with the release.
 
 ## Policy notes
@@ -87,9 +89,9 @@ Continuum is not affiliated with or endorsed by Blizzard.
 
 ### New
 
-- Cross-zone active quest positions on the seamless map.
-- Independent Atlas Continuum package, saved variables, API, commands, and
-  diagnostics.
+- Status-aware cross-zone active quest markers on the seamless map.
+- Objective progress, enhanced quest tooltips, marker sizing, and tracked-only
+  mode.
 
 ### Attribution
 

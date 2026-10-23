@@ -4,6 +4,13 @@
 local _, ns = ...
 
 ns.MapChangelog = {
+	{ version = "0.3.0-beta.1", date = "2026-10-23", heads = { [1] = "New", [5] = "Improved", }, items = {
+		"|cff6e2c0aQuest marker states|r: bridged active quests now distinguish in-progress, watched, ready for turn-in, failed and temporarily disabled quests. The super-tracked quest is larger, raised above the others and uses Blizzard's selected marker.",
+		"|cff6e2c0aObjective progress|r: watched and super-tracked bridged markers show a compact progress label. Their tooltips include waypoint text, up to five objectives, completed-objective colouring, quest type and time remaining when Blizzard provides them.",
+		"|cff6e2c0aQuest marker settings|r: Options can resize Atlas Continuum's bridged markers from 65% to 175%, or show only watched and super-tracked quests outside the host zone.",
+		"Quest markers now refresh for acceptance, removal, turn-in, criteria progress, watch progress, task progress and waypoint changes as well as the existing quest-log and POI events.",
+		"Hovering a bridged marker now participates in Blizzard's quest highlight manager, and leaving it clears the highlight.",
+	} },
 	{ version = "0.2.0-beta.1", date = "2026-10-23", heads = { [1] = "New", [3] = "Changed", }, items = {
 		"|cff6e2c0aCross-zone active quest positions|r: the seamless map now adds the ongoing quest markers Blizzard omits outside the single zone hosted underneath the stitched view. Native quest pins remain native; only missing pins are bridged, and a click super-tracks the quest.",
 		"|cff6e2c0aAtlas Continuum|r is now an independent Retail addon identity with its own folder, settings, commands, API, inter-addon message prefix and release package.",

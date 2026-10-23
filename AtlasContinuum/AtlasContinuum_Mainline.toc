@@ -1,12 +1,12 @@
 ## Interface: 120105
 ## Title: |cffe6b85cAtlas|r Continuum
-## Notes: A seamless, detailed Retail world map with cross-zone active quest positions. /atlascontinuum /acaudit
+## Notes: A seamless, detailed Retail world map with rich cross-zone active quest markers. /atlascontinuum /acaudit
 ## Author: Atlas Continuum contributors; based on OpenMap
 ## IconTexture: Interface\AddOns\AtlasContinuum\Media\Brand\Icon
 ## AddonCompartmentFunc: AtlasContinuum_OnAddonCompartmentClick
 ## AddonCompartmentFuncOnEnter: AtlasContinuum_OnAddonCompartmentEnter
 ## AddonCompartmentFuncOnLeave: AtlasContinuum_OnAddonCompartmentLeave
-## Version: 0.2.0-beta.1
+## Version: 0.3.0-beta.1
 ## SavedVariables: AtlasContinuumDB, AtlasContinuumLabDB
 ## SavedVariablesPerCharacter: AtlasContinuumCharDB
 ## OptionalDeps: Leatrix_Maps, Mapster, Magnify

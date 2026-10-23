@@ -14,9 +14,11 @@ untouched.
 
 ## Status
 
-- Beta version: `0.2.0-beta.1`.
+- Beta version: `0.3.0-beta.1`.
 - Interface target: `120105` (Retail 12.1.5).
 - Retail datasets: build `12.1.5.70448`.
+- Bridged quests distinguish watched, super-tracked, ready, failed, and disabled
+  states, with objective progress and configurable marker size.
 - Quest bridge behavior is covered by a mocked Lua test.
 - TOC entries, Retail data selection, Lua syntax, diagnostics, and packaging are
   validated by `make check`.

@@ -28,6 +28,8 @@ local mod = ns:NewModule("worldmap", {
 		zeppelins = true,       -- zeppelin towers (Horde's) and routes
 		flight = true,
 		playerArrow = true,     -- your own arrow on the world map (off: find your way old-school; the party still shows)
+		questMarkerScale = 1,   -- Atlas Continuum's cross-zone quest pins (Blizzard's host-zone pin keeps its own scale)
+		questOnlyTracked = false,
 		iconsFrom = 0,          -- the places' icons from this zoom (ICONS_FROM; 1: the whole world); 0: each from its own (Auto)
 		routes = false,         -- boat and zeppelin routes
 		colorMatch = 1,         -- how far zone borders move to the shared palette
@@ -1129,6 +1131,7 @@ function mod:Options()
 			desc = "Your own arrow on the world map. Off, you find your way old-school, by the land around you; your party still shows, and so does the minimap." },
 	}
 	if mod.ExtraOptions then mod:ExtraOptions(opts, get, set, off) end
+	if mod.QuestBridgeOptions then mod:QuestBridgeOptions(opts, get, set, off) end
 	if mod.NavOptions then mod:NavOptions(opts, get, set, off) end
 	if mod.PinOptions then mod:PinOptions(opts, get, set, off) end
 	if mod.DungeonOptions then mod:DungeonOptions(opts, get, set, off) end
