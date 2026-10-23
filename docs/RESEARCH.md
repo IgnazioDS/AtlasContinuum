@@ -4,9 +4,11 @@
 
 WorldPane augments Blizzard's `WorldMapFrame`. A stitched coordinate system
 places supported Azeroth continents, zones, cities, exploration overlays, and
-detail layers into one pannable canvas. Blizzard remains responsible for the
-host frame, quest log, many pin providers, and native maps outside that shared
-coordinate space.
+detail layers into one pannable canvas. World spaces outside Azeroth retain
+Blizzard's native coordinate system while WorldPane discovers their child
+zones at runtime and crossfades detailed zone art into the regional canvas.
+Blizzard remains responsible for the host frame, quest log, pin providers, and
+the native coordinate system.
 
 The central rule is ownership by map depth: broad parchment and continent art
 appear at low zoom; zone and city art become authoritative as the view closes
@@ -17,11 +19,13 @@ map rectangles intersect.
 
 1. Azeroth uses the stitched canvas.
 2. Wheel zoom and clicks descend into supported continent, zone, and city art.
-3. Detached world spaces and maps without a valid Azeroth rectangle transition
-   to Blizzard's native canvas.
-4. Zooming or navigating outward from the fitted Azeroth view reaches the
+3. Non-Azeroth continents stay on their native canvas but gain dynamically
+   discovered zone previews and deeper zoom levels.
+4. Detached zones without a parent rectangle, including map-link medallions,
+   transition directly to their detailed native canvas.
+5. Zooming or navigating outward from the fitted Azeroth view reaches the
    cosmic map, where Outland, Draenor, and other worlds remain selectable.
-5. Back, right-click, Escape, breadcrumbs, and gamepad actions must preserve a
+6. Back, right-click, Escape, breadcrumbs, and gamepad actions must preserve a
    predictable parent chain.
 
 ## Quest bridge

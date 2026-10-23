@@ -10,14 +10,16 @@ API, inter-addon protocol, validation, packaging, and support workflow.
 
 ## Current beta
 
-- Version `0.1.0-beta.1`; Retail interface `120105`.
+- Version `0.1.1-beta.1`; Retail interface `120105`.
 - Cross-zone active quest markers preserve watched, super-tracked, ready,
   campaign, recurring, legendary, calling, important, and meta treatments.
 - Objective progress, focused-quest filtering, rich tooltips, marker controls,
   and an optional guide line to the super-tracked quest.
 - Zooming beyond Azeroth reaches Blizzard's cosmic map for Outland, Draenor,
-  and other world spaces.
-- Voidstorm and Harandar use intentional native-map transitions.
+  and other world spaces; their continent maps gain live zone-detail previews
+  and deeper, smoothly blended zoom levels.
+- Voidstorm and Harandar map links open their detailed native maps with either
+  mouse button instead of being swallowed by the stitched canvas.
 - Targeted current-Retail policies improve Quel'Thalas overlap and Silvermoon
   close-up rendering.
 - Existing settings from the previous package identity migrate automatically.

@@ -3,6 +3,17 @@
 local _, ns = ...
 
 ns.MapChangelog = {
+	{ version = "0.1.1-beta.1", date = "2026-10-23", heads = {
+		[1] = "Every world",
+		[4] = "Detached zones",
+	}, items = {
+		"|cff6e2c0aRegional detail previews|r: Outland, Draenor, the Shadowlands, and other non-Azeroth continents now discover their zones from the live Retail client and blend detailed zone art into the native map while zooming.",
+		"Regional maps gain deeper zoom levels without forcing unrelated world spaces into Azeroth's coordinate system.",
+		"The renderer reuses art frames between regions and caps zone and texture work to keep transitions bounded.",
+
+		"|cff6e2c0aVoidstorm and Harandar|r now resolve both detached hierarchy targets and Blizzard map-link pins before WorldPane's stitched click handling.",
+		"Left- or right-clicking either detached destination opens its native map, then blends in its complete reveal art and deeper zoom levels; ordinary map links retain Blizzard's behavior.",
+	} },
 	{ version = "0.1.0-beta.1", date = "2026-10-23", heads = {
 		[1] = "WorldPane",
 		[4] = "Navigation",

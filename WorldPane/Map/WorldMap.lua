@@ -764,11 +764,11 @@ local function OnCanvasClick(_, button)
 	local chain = S.ChainAt(u, v)
 	if button == "LeftButton" then
 		-- Detached zones can appear as medallions on Azeroth while their detailed art belongs to another
-		-- world space. Open them natively instead of pretending they have an Azeroth stitch rectangle.
+		-- world space. Resolve those before the stitched chain: a detached child has no rectangle by
+		-- definition, so it can never be appended to S.ChainAt.
 		local away = ns.ClientMaps and ns.ClientMaps.awayMaps
-		for i = #chain, 1, -1 do
-			if away and away[chain[i]] then OpenNativeMap(chain[i]) return true end
-		end
+		local detached = ns.MapRegions and ns.MapRegions.DetachedAt(WORLD, u, v, away)
+		if detached then OpenNativeMap(detached) return true end
 		for _, id in ipairs(chain) do
 			if id ~= WORLD and Stitchable(id) and FitZoom(id) > zoom * 1.05 then
 				local l, r, t, b = S.Rect(id)
@@ -819,9 +819,16 @@ end
 -- a click on one of Blizzard's map icons goes to its pin handlers, not the canvas's: dropping a
 -- pin works there too (Blizzard's own only took Ctrl-clicks, never the menu's pin button)
 local function OnBlizzardPinAction(_, action, button)
-	if not Dropping(button) then return false end
-	if action == MapCanvasMixin.MouseAction.Click then DropAtCursor() end
-	return action ~= MapCanvasMixin.MouseAction.Up
+	if Dropping(button) then
+		if action == MapCanvasMixin.MouseAction.Click then DropAtCursor() end
+		return action ~= MapCanvasMixin.MouseAction.Up
+	end
+	if active and action == MapCanvasMixin.MouseAction.Click and (button == "LeftButton" or button == "RightButton") then
+		local away = ns.ClientMaps and ns.ClientMaps.awayMaps
+		local target = ns.MapRegions and ns.MapRegions.LinkedAwayMap(map:GetHoveredPin(), away)
+		if target then OpenNativeMap(target) return true end
+	end
+	return false
 end
 
 local function Setup()
@@ -960,6 +967,9 @@ local function Setup()
 	map:AddDataProvider(dp)
 
 	if mod.SetupExtras then mod:SetupExtras(map) end
+	if mod.SetupRegional then
+		mod:SetupRegional(map, fl:GetValidFrameLevel("PIN_FRAME_LEVEL_WORLDPANE_STITCH"), ART_RANGE)
+	end
 	if mod.SetupFlights then mod:SetupFlights() end
 	ns.RegisterEvent(mod, "MAP_EXPLORATION_UPDATED", function() if S.IsBuilt() then S.RefreshExplored() end end)
 	if mod.SetupNav then mod:SetupNav(map) end          -- (before the menu: it holds Nav's search box)

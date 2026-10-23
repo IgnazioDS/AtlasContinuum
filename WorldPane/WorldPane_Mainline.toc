@@ -6,7 +6,7 @@
 ## AddonCompartmentFunc: WorldPane_OnAddonCompartmentClick
 ## AddonCompartmentFuncOnEnter: WorldPane_OnAddonCompartmentEnter
 ## AddonCompartmentFuncOnLeave: WorldPane_OnAddonCompartmentLeave
-## Version: 0.1.0-beta.1
+## Version: 0.1.1-beta.1
 ## SavedVariables: WorldPaneDB, WorldPaneLabDB
 ## SavedVariablesPerCharacter: WorldPaneCharDB
 ## OptionalDeps: AtlasContinuum, Leatrix_Maps, Mapster, Magnify
@@ -42,6 +42,7 @@ RetailLab\Audit.lua
 # The map
 Map\Stitch.lua
 Map\WorldMap.lua
+Map\Regional.lua
 Map\QuestBridge.lua
 Map\Close.lua
 Map\Extras.lua
