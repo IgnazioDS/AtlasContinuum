@@ -6,7 +6,7 @@
 ## AddonCompartmentFunc: AtlasContinuum_OnAddonCompartmentClick
 ## AddonCompartmentFuncOnEnter: AtlasContinuum_OnAddonCompartmentEnter
 ## AddonCompartmentFuncOnLeave: AtlasContinuum_OnAddonCompartmentLeave
-## Version: 0.3.0-beta.1
+## Version: 0.4.0-beta.1
 ## SavedVariables: AtlasContinuumDB, AtlasContinuumLabDB
 ## SavedVariablesPerCharacter: AtlasContinuumCharDB
 ## OptionalDeps: Leatrix_Maps, Mapster, Magnify

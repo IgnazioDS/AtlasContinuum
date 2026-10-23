@@ -30,8 +30,10 @@ Features:
 - Detailed Retail zone, city, cave, and dungeon views.
 - Missing active quest positions across visible zones, with watched, ready,
   failed, disabled, and super-tracked visual states.
-- Objective progress, richer tooltips, click-to-super-track, marker sizing,
-  and an optional tracked-only mode.
+- Objective progress, richer tooltips, click-to-super-track, focused-quest
+  filtering, marker sizing/opacity, and an optional tracked-only mode.
+- Campaign-aware quest art and an optional live guide line from the player to
+  the super-tracked quest across the stitched world.
 - Blizzard quest log and map controls remain in their normal frame.
 - Dungeon entrances, flight masters, boats, zeppelins, routes, map pins, and
   drawing tools.
@@ -58,7 +60,7 @@ Continuum is not affiliated with or endorsed by Blizzard.
 2. Continent-to-zone transition.
 3. City detail.
 4. Two visible neighboring zones with bridged active quest markers.
-5. Quest marker tooltip and super-tracked state.
+5. Quest marker tooltip, campaign styling, and super-tracked guide line.
 6. Dungeon map and side panel.
 7. Settings menu.
 
@@ -73,7 +75,7 @@ Continuum is not affiliated with or endorsed by Blizzard.
 - Test login, `/reload`, windowed/full-screen map, zoom, pan, quest progress,
   quest turn-in, super-tracking, city alignment, and saved settings.
 - Test with no other addons, then with common pin providers.
-- Upload `dist/AtlasContinuum-0.3.0-beta.1.zip` as a Beta file.
+- Upload `dist/AtlasContinuum-0.4.0-beta.1.zip` as a Beta file.
 - Publish the source and `NOTICE.md` with the release.
 
 ## Policy notes
@@ -92,6 +94,15 @@ Continuum is not affiliated with or endorsed by Blizzard.
 - Status-aware cross-zone active quest markers on the seamless map.
 - Objective progress, enhanced quest tooltips, marker sizing, and tracked-only
   mode.
+- A live player-to-objective guide line for the super-tracked quest.
+
+### Improved
+
+- Focused quests now hide unrelated bridged pins, matching Blizzard's native
+  world-map behavior.
+- Ready-for-turn-in markers and glows preserve campaign, legendary, recurring,
+  important, calling, and meta quest treatments.
+- Quest marker opacity and progress-label visibility are configurable.
 
 ### Attribution
 

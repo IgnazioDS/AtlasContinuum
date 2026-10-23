@@ -1,5 +1,9 @@
 local addon_file = assert(arg[1], "usage: lua quest_bridge_spec.lua path/to/QuestBridge.lua")
 
+Enum = { QuestClassification = {
+	Legendary = 1, Campaign = 2, Calling = 3, Recurring = 4, Important = 5, Meta = 6,
+} }
+
 local quests = {
 	{ title = "A Real Quest", questID = 101 },
 	{ title = "Native Quest", questID = 102 },
@@ -7,7 +11,7 @@ local quests = {
 	{ title = "World Task", questID = 103, isTask = true },
 	{ title = "Hidden", questID = 104, isHidden = true },
 	{ title = "No World Position", questID = 105 },
-	{ title = "Ready Quest", questID = 106 },
+	{ title = "Ready Quest", questID = 106, questClassification = Enum.QuestClassification.Campaign },
 	{ title = "Failed Quest", questID = 107 },
 	{ title = "Disabled Quest", questID = 108 },
 }
@@ -30,36 +34,80 @@ local objectives = {
 }
 
 local added = {}
+local guideLines = {}
 local tracked = 101
+local focusedQuest
 local eventHandlers = {}
+local focusCallbacks = {}
 local tooltipLines = {}
 local highlighted
 
 local stitch = {
 	Rect = function(mapID) return mapID == 10 and { 0, 1, 0, 1 } or nil end,
 	IsBuilt = function() return true end,
-	PinSet = function() return { pins = {} } end,
-	ClearPinSet = function(set) set.pins = {}; added = {} end,
+	PinSet = function(key) return { key = key, pins = {}, lines = {} } end,
+	ClearPinSet = function(set)
+		set.pins = {}
+		set.lines = {}
+		if set.key == "retail_active_quests" then added = {} end
+		if set.key == "retail_quest_guide" then guideLines = {} end
+	end,
 	AddPin = function(set, u, v, look, data)
+		local function Texture()
+			return {
+				SetPoint = function() end,
+				SetBlendMode = function() end,
+				SetAtlas = function(self, atlas) self.atlas = atlas end,
+				SetSize = function(self, width, height) self.width, self.height = width, height end,
+				SetAlpha = function(self, alpha) self.alpha = alpha end,
+				SetShown = function(self, shown) self.shown = shown end,
+			}
+		end
+		local function FontString()
+			return {
+				SetPoint = function() end,
+				SetTextColor = function() end,
+				SetText = function(self, text) self.text = text end,
+				SetAlpha = function(self, alpha) self.alpha = alpha end,
+				SetShown = function(self, shown) self.shown = shown end,
+			}
+		end
 		local pin = {
 			u = u, v = v, look = look, data = data,
+			Icon = { SetAlpha = function(self, alpha) self.alpha = alpha end },
+			Highlight = { SetAlpha = function(self, alpha) self.alpha = alpha end },
+			GetWidth = function() return look.size end,
+			GetHeight = function() return look.size end,
+			CreateTexture = function() return Texture() end,
+			CreateFontString = function() return FontString() end,
 			SetScript = function(self, script, fn) self[script] = fn end,
 		}
 		set.pins[#set.pins + 1] = pin
 		added[#added + 1] = pin
 		return pin
 	end,
+	AddLine = function(set, u1, v1, u2, v2, thickness, r, g, b, a, texture)
+		local line = { u1 = u1, v1 = v1, u2 = u2, v2 = v2, thickness = thickness,
+			r = r, g = g, b = b, a = a, texture = texture }
+		set.lines[#set.lines + 1] = line
+		guideLines[#guideLines + 1] = line
+		return line
+	end,
 }
 
 local worldmap = {
 	ToWorld = function(_, x, y) return x + 0.1, y + 0.2 end,
 	IsStitched = function() return true end,
-	db = { questMarkerScale = 1, questOnlyTracked = false },
+	db = { questMarkerScale = 1, questMarkerOpacity = 1, questProgressLabels = true,
+		questGuideLine = true, questOnlyTracked = false },
 }
 
 local ns = {
 	MapStitch = stitch,
-	Safe = { IsSecret = function() return false end },
+	Safe = {
+		IsSecret = function() return false end,
+		XY = function(position) return position.x, position.y end,
+	},
 	L = setmetatable({}, { __index = function(_, key) return key end }),
 	GetModule = function(_, key) assert(key == "worldmap"); return worldmap end,
 	RegisterEvent = function(owner, event, fn) eventHandlers[event] = { owner, fn }; return true end,
@@ -87,7 +135,14 @@ C_SuperTrack = {
 	SetSuperTrackedQuestID = function(questID) tracked = questID end,
 }
 
-C_Map = { GetMapInfo = function() return { name = "Test Zone" } end }
+C_Map = {
+	GetMapInfo = function() return { name = "Test Zone" } end,
+	GetBestMapForUnit = function(unit) assert(unit == "player"); return 10 end,
+	GetPlayerMapPosition = function(mapID, unit)
+		assert(mapID == 10 and unit == "player")
+		return { x = 0.1, y = 0.2 }
+	end,
+}
 C_Timer = { After = function(_, fn) fn() end }
 EventRegistry = { RegisterCallback = function() end }
 GetCVarBool = function() return true end
@@ -113,6 +168,7 @@ POIButtonHighlightManager = {
 local nativePin = { GetQuestID = function() return 102 end }
 WorldMapFrame = {
 	IsShown = function() return true end,
+	RegisterCallback = function(_, name, fn, owner) focusCallbacks[name] = { fn, owner } end,
 	EnumeratePinsByTemplate = function(_, template)
 		assert(template == "QuestPinTemplate")
 		local done = false
@@ -121,6 +177,7 @@ WorldMapFrame = {
 		end
 	end,
 }
+QuestMapFrame_GetFocusedQuestID = function() return focusedQuest end
 
 local chunk = assert(loadfile(addon_file))
 chunk("AtlasContinuum", ns)
@@ -144,6 +201,7 @@ assert(collected[1].questID == 101)
 assert(collected[1].state == "progress" and collected[1].watched)
 assert(bridge.ProgressText(collected[1]) == "4/10")
 assert(collected[2].state == "ready")
+assert(collected[2].classification == Enum.QuestClassification.Campaign)
 assert(collected[3].state == "failed")
 assert(collected[4].state == "disabled")
 
@@ -151,13 +209,21 @@ local watchedLook = bridge.LookFor(collected[1], false, 1)
 assert(watchedLook.size == 27 and watchedLook.atlas == "Quest-In-Progress-Icon-yellow")
 local trackedLook = bridge.LookFor(collected[1], true, 1)
 assert(trackedLook.size == 31 and trackedLook.atlas == "Quest-In-Progress-Icon-Brown")
-assert(bridge.LookFor(collected[2], false, 1).atlas == "UI-QuestPoi-QuestBangTurnIn")
+assert(bridge.LookFor(collected[2], false, 1).atlas == "UI-QuestPoiCampaign-QuestBangTurnIn")
+assert(bridge.GlowAtlas(collected[2]) == "UI-QuestPoiCampaign-OuterGlow")
 assert(bridge.LookFor(collected[3], false, 1).color[1] == 1)
 assert(bridge.LookFor(collected[4], false, 1).atlas == "QuestSharing-QuestLog-Padlock")
 assert(bridge.LookFor(collected[1], true, 0.5).size == 20, "scale should clamp to 65%")
 
 bridge.Refresh()
 assert(#added == 4 and added[1].data.questID == 101)
+assert(#guideLines == 1)
+assert(guideLines[1].u1 == 0.2 and guideLines[1].v1 == 0.4)
+assert(guideLines[1].u2 == 0.35 and guideLines[1].v2 == 0.95)
+assert(focusCallbacks.SetFocusedQuestID and focusCallbacks.ClearFocusedQuestID)
+assert(added[1].QuestBridgeProgress.shown and added[1].QuestBridgeProgress.text == "4/10")
+assert(added[2].QuestBridgeGlow.atlas == "UI-QuestPoiCampaign-OuterGlow")
+assert(added[2].QuestBridgeGlow.shown == true)
 assert(type(added[1].OnEnter) == "function")
 assert(type(added[1].OnLeave) == "function")
 assert(type(added[1].OnClick) == "function")
@@ -175,9 +241,32 @@ bridge.Refresh()
 assert(#added == 2, "watched and super-tracked quests should remain")
 assert(added[1].data.questID == 101 and added[2].data.questID == 106)
 
+worldmap.db.questOnlyTracked = false
+worldmap.db.questMarkerOpacity = 0.55
+worldmap.db.questProgressLabels = false
+focusedQuest = 106
+bridge.Refresh()
+assert(#added == 1 and added[1].data.questID == 106, "focused quest should hide other bridged pins")
+assert(added[1].Icon.alpha == 0.55)
+assert(added[1].QuestBridgeProgress.shown == false)
+
+focusedQuest = nil
+tracked = 102
+bridge.RefreshGuide()
+assert(#guideLines == 1 and guideLines[1].u2 == 0.6 and guideLines[1].v2 == 0.7,
+	"guide should reach a native host-zone quest too")
+
+worldmap.db.questGuideLine = false
+bridge.RefreshGuide()
+assert(#guideLines == 0, "guide setting should clear the line")
+worldmap.db.questGuideLine = true
+
 local options = {}
 worldmap:QuestBridgeOptions(options, function() end, function() end, function() return false end)
 assert(options.questMarkerScale.type == "range")
+assert(options.questMarkerOpacity.type == "range")
+assert(options.questProgressLabels.type == "toggle")
+assert(options.questGuideLine.type == "toggle")
 assert(options.questOnlyTracked.type == "toggle")
 
 assert(eventHandlers.QUEST_LOG_UPDATE)

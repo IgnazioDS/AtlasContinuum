@@ -13,7 +13,9 @@ local Bridge = {}
 ns.QuestBridge = Bridge
 
 local QUEST_SET = "retail_active_quests"
+local GUIDE_SET = "retail_quest_guide"
 local QUEST_TEMPLATE = "QuestPinTemplate"
+local GUIDE_TEXTURE = "Interface\\Buttons\\WHITE8X8"
 local IN_PROGRESS = {
 	atlas = "Quest-In-Progress-Icon-yellow",
 	texture = "Interface\\GossipFrame\\ActiveQuestIcon",
@@ -47,7 +49,29 @@ local DISABLED = {
 }
 
 local set
+local guideSet
+local guideTicker
 local refreshQueued = false
+local focusCallbacksRegistered = false
+
+local READY_ATLAS = {}
+local GLOW_ATLAS = {}
+do
+	local classifications = Enum and Enum.QuestClassification
+	local function Add(name, readyAtlas, glowAtlas)
+		local value = classifications and classifications[name]
+		if value ~= nil then
+			READY_ATLAS[value] = readyAtlas
+			GLOW_ATLAS[value] = glowAtlas
+		end
+	end
+	Add("Legendary", "UI-QuestPoiLegendary-QuestBangTurnIn", "UI-QuestPoiLegendary-OuterGlow")
+	Add("Campaign", "UI-QuestPoiCampaign-QuestBangTurnIn", "UI-QuestPoiCampaign-OuterGlow")
+	Add("Calling", "UI-DailyQuestPoiCampaign-QuestBangTurnIn", "UI-QuestPoiCampaign-OuterGlow")
+	Add("Recurring", "UI-QuestPoiRecurring-QuestBangTurnIn", "UI-QuestPoiRecurring-OuterGlow")
+	Add("Important", "UI-QuestPoiImportant-QuestBangTurnIn", "UI-QuestPoiImportant-OuterGlow")
+	Add("Meta", "UI-QuestPoiWrapper-QuestBangTurnIn", "UI-QuestPoiWrapper-OuterGlow")
+end
 
 local function IsPlainNumber(value)
 	return type(value) == "number" and not ns.Safe.IsSecret(value)
@@ -171,7 +195,32 @@ function Bridge.LookFor(quest, superTracked, scale)
 	elseif quest.state == "failed" then look = FAILED
 	elseif quest.state == "ready" then look = READY
 	elseif quest.watched then look = WATCHED end
-	return ScaledLook(look, scale)
+	look = ScaledLook(look, scale)
+	if quest.state == "ready" and not superTracked then
+		look.atlas = READY_ATLAS[quest.classification] or look.atlas
+	end
+	return look
+end
+
+function Bridge.GlowAtlas(quest)
+	return GLOW_ATLAS[quest and quest.classification] or "UI-QuestPoi-OuterGlow"
+end
+
+function Bridge.FocusedQuestID()
+	local questID = SafeResult(_G.QuestMapFrame_GetFocusedQuestID)
+	if IsPlainNumber(questID) and questID > 0 then return questID end
+end
+
+function Bridge.PlayerWorld()
+	if not C_Map then return end
+	local mapID = SafeResult(C_Map.GetBestMapForUnit, "player")
+	if not IsPlainNumber(mapID) or not S.Rect(mapID) then return end
+	local position = SafeResult(C_Map.GetPlayerMapPosition, mapID, "player")
+	if not position then return end
+	local x, y = ns.Safe.XY(position)
+	if not IsPlainNumber(x) or not IsPlainNumber(y) or (x == 0 and y == 0) then return end
+	local u, v = mod.ToWorld(mapID, x, y)
+	if IsPlainNumber(u) and IsPlainNumber(v) then return u, v end
 end
 
 -- questID -> true for Blizzard pins which are already present on the host map.
@@ -285,11 +334,15 @@ local function PinClick(pin)
 	end
 end
 
-local function ConfigurePin(pin, quest)
+local function ConfigurePin(pin, quest, opacity, showProgress)
+	opacity = IsPlainNumber(opacity) and math.max(0.3, math.min(1, opacity)) or 1
 	if pin.SetFrameLevel and pin.GetFrameLevel then
 		pin:SetFrameLevel(pin:GetFrameLevel() + (quest.superTracked and 2 or quest.ready and 1 or 0))
 	end
-	if pin.Highlight and pin.Highlight.SetAlpha then pin.Highlight:SetAlpha(quest.superTracked and 0.65 or 0.3) end
+	if pin.Icon and pin.Icon.SetAlpha then pin.Icon:SetAlpha(opacity) end
+	if pin.Highlight and pin.Highlight.SetAlpha then
+		pin.Highlight:SetAlpha((quest.superTracked and 0.65 or 0.3) * opacity)
+	end
 
 	if pin.CreateTexture then
 		if not pin.QuestBridgeGlow then
@@ -298,10 +351,11 @@ local function ConfigurePin(pin, quest)
 			pin.QuestBridgeGlow:SetBlendMode("ADD")
 		end
 		local glow = pin.QuestBridgeGlow
-		if glow.SetAtlas then glow:SetAtlas("UI-QuestPoi-OuterGlow") end
+		local classified = GLOW_ATLAS[quest.classification] ~= nil
+		if glow.SetAtlas then glow:SetAtlas(Bridge.GlowAtlas(quest)) end
 		glow:SetSize(pin:GetWidth() * 1.55, pin:GetHeight() * 1.55)
-		glow:SetAlpha(quest.superTracked and 0.9 or 0.5)
-		glow:SetShown(quest.superTracked or quest.watched)
+		glow:SetAlpha((quest.superTracked and 0.9 or quest.watched and 0.5 or 0.38) * opacity)
+		glow:SetShown(quest.superTracked or quest.watched or classified)
 	end
 
 	if pin.CreateFontString then
@@ -312,30 +366,83 @@ local function ConfigurePin(pin, quest)
 		end
 		local progress = Bridge.ProgressText(quest)
 		pin.QuestBridgeProgress:SetText(progress or "")
-		pin.QuestBridgeProgress:SetShown(progress ~= nil and (quest.superTracked or quest.watched))
+		if pin.QuestBridgeProgress.SetAlpha then pin.QuestBridgeProgress:SetAlpha(opacity) end
+		pin.QuestBridgeProgress:SetShown(showProgress and progress ~= nil and (quest.superTracked or quest.watched))
 	end
+end
+
+function Bridge.RefreshGuide()
+	if guideSet then S.ClearPinSet(guideSet) end
+	local mapCanvas = _G.WorldMapFrame
+	if not mapCanvas or not mapCanvas:IsShown() or not mod.IsStitched() or not S.IsBuilt() then return end
+	if GetCVarBool and not GetCVarBool("questPOI") then return end
+	if mod.db and mod.db.questGuideLine == false then return end
+
+	local questID = C_SuperTrack and C_SuperTrack.GetSuperTrackedQuestID
+		and SafeResult(C_SuperTrack.GetSuperTrackedQuestID) or 0
+	if not IsPlainNumber(questID) or questID <= 0 then return end
+	local _, _, _, targetU, targetV = Bridge.ReadWaypoint(questID)
+	if not targetU then return end
+	local playerU, playerV = Bridge.PlayerWorld()
+	if not playerU then return end
+
+	guideSet = guideSet or S.PinSet(GUIDE_SET, 1, 4)
+	S.AddLine(guideSet, playerU, playerV, targetU, targetV, 2.5, 1, 0.72, 0.18, 0.72, GUIDE_TEXTURE)
+end
+
+local function SetGuideTicker(shown)
+	if not guideTicker and type(CreateFrame) == "function" then
+		local ok, frame = pcall(CreateFrame, "Frame")
+		if ok and frame and frame.SetScript then
+			guideTicker = frame
+			local elapsed = 0
+			guideTicker:SetScript("OnUpdate", function(_, delta)
+				elapsed = elapsed + delta
+				if elapsed >= 0.25 then
+					elapsed = 0
+					Bridge.RefreshGuide()
+				end
+			end)
+		end
+	end
+	if not guideTicker then return end
+	if shown and guideTicker.Show then guideTicker:Show()
+	elseif guideTicker.Hide then guideTicker:Hide() end
+end
+
+local function RegisterFocusCallbacks(mapCanvas)
+	if focusCallbacksRegistered or not mapCanvas or type(mapCanvas.RegisterCallback) ~= "function" then return end
+	local focused = pcall(mapCanvas.RegisterCallback, mapCanvas, "SetFocusedQuestID", Bridge.QueueRefresh, Bridge)
+	local cleared = pcall(mapCanvas.RegisterCallback, mapCanvas, "ClearFocusedQuestID", Bridge.QueueRefresh, Bridge)
+	focusCallbacksRegistered = focused or cleared
 end
 
 function Bridge.Refresh()
 	refreshQueued = false
 	if set then S.ClearPinSet(set) end
+	Bridge.RefreshGuide()
 
 	local mapCanvas = _G.WorldMapFrame
 	if not mapCanvas or not mapCanvas:IsShown() or not mod.IsStitched() or not S.IsBuilt() then return end
 	if GetCVarBool and not GetCVarBool("questPOI") then return end
+	RegisterFocusCallbacks(mapCanvas)
 
 	set = set or S.PinSet(QUEST_SET, 1, 5)
 	local native = Bridge.NativeQuestIDs(mapCanvas)
 	local superTracked = C_SuperTrack and C_SuperTrack.GetSuperTrackedQuestID
 		and SafeResult(C_SuperTrack.GetSuperTrackedQuestID) or 0
 	local scale = mod.db and mod.db.questMarkerScale or 1
+	local opacity = mod.db and mod.db.questMarkerOpacity or 1
+	local showProgress = not mod.db or mod.db.questProgressLabels ~= false
 	local onlyTracked = mod.db and mod.db.questOnlyTracked
+	local focusedQuestID = Bridge.FocusedQuestID()
 
 	for _, quest in ipairs(Bridge.Collect(native)) do
 		quest.superTracked = quest.questID == superTracked
-		if not onlyTracked or quest.superTracked or quest.watched then
+		if (not focusedQuestID or quest.questID == focusedQuestID)
+			and (not onlyTracked or quest.superTracked or quest.watched) then
 			local pin = S.AddPin(set, quest.u, quest.v, Bridge.LookFor(quest, quest.superTracked, scale), quest)
-			ConfigurePin(pin, quest)
+			ConfigurePin(pin, quest, opacity, showProgress)
 			pin:SetScript("OnEnter", PinEnter)
 			pin:SetScript("OnLeave", PinLeave)
 			pin.OnClick = PinClick
@@ -384,7 +491,17 @@ function mod:QuestBridgeOptions(opts, get, setOption, off)
 		min = 0.65, max = 1.75, step = 0.05, isPercent = true, get = get,
 		set = function(info, value) setOption(info, value); Bridge.QueueRefresh() end, disabled = off,
 		desc = ns.L["The size of Atlas Continuum's bridged quest markers. Blizzard's native marker in the host zone keeps the game's size."] }
-	opts.questOnlyTracked = { type = "toggle", name = ns.L["Only tracked quests outside the host zone"], order = 34.4,
+	opts.questMarkerOpacity = { type = "range", name = ns.L["Quest marker opacity"], order = 34.4,
+		min = 0.3, max = 1, step = 0.05, isPercent = true, get = get,
+		set = function(info, value) setOption(info, value); Bridge.QueueRefresh() end, disabled = off,
+		desc = ns.L["The opacity of Atlas Continuum's bridged quest markers."] }
+	opts.questProgressLabels = { type = "toggle", name = ns.L["Show quest progress labels"], order = 34.5,
+		width = "full", get = get, set = function(info, value) setOption(info, value); Bridge.QueueRefresh() end, disabled = off,
+		desc = ns.L["Show compact objective progress below tracked bridged quest markers."] }
+	opts.questGuideLine = { type = "toggle", name = ns.L["Guide line to the super-tracked quest"], order = 34.6,
+		width = "full", get = get, set = function(info, value) setOption(info, value); Bridge.QueueRefresh() end, disabled = off,
+		desc = ns.L["Draw a live line from your position to the super-tracked quest when both positions are on the stitched world."] }
+	opts.questOnlyTracked = { type = "toggle", name = ns.L["Only tracked quests outside the host zone"], order = 34.7,
 		width = "full", get = get, set = function(info, value) setOption(info, value); Bridge.QueueRefresh() end, disabled = off,
 		desc = ns.L["Hide untracked bridged quests. The super-tracked quest always remains visible."] }
 end
@@ -398,11 +515,14 @@ end
 local onMapShown = mod.OnMapShown
 mod.OnMapShown = function(...)
 	if onMapShown then onMapShown(...) end
+	SetGuideTicker(true)
 	Bridge.QueueRefresh()
 end
 
 local onMapHidden = mod.OnMapHidden
 mod.OnMapHidden = function(...)
 	if onMapHidden then onMapHidden(...) end
+	SetGuideTicker(false)
 	if set then S.ClearPinSet(set) end
+	if guideSet then S.ClearPinSet(guideSet) end
 end

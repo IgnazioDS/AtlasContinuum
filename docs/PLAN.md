@@ -14,6 +14,8 @@
 - Added Retail Quest Layer 2.0 marker states, watched/super-tracked emphasis,
   objective progress, richer tooltips, configurable sizing, tracked-only mode,
   and refresh coverage for the full active-quest lifecycle.
+- Added focused-quest behavior, campaign-aware marker treatments, marker
+  opacity and progress-label controls, and a live super-tracked quest guide.
 
 ## Next quest-layer increment
 
@@ -23,8 +25,8 @@
   native blob pin blindly.
 - Add an in-game diagnostic that reports why an active quest could not be
   projected: missing waypoint, unstitched map, secret value, or native pin.
-- Evaluate campaign/important/recurring visual treatments without diverging
-  from Blizzard's current POI language.
+- Add an optional distance readout to the super-tracked quest guide after
+  validating phased and cross-continent world-position behavior in game.
 
 ## Release gate 1 — in-game quest verification
 
@@ -34,6 +36,9 @@
 - Advance an objective and confirm its marker refreshes or moves.
 - Complete a quest and confirm the turn-in marker appears.
 - Click a bridged marker and confirm Blizzard super-tracking updates.
+- Focus a quest from the quest log and confirm unrelated bridged markers hide.
+- Move with a super-tracked quest and confirm its guide line follows the player.
+- Verify campaign, important, recurring, legendary, calling, and meta markers.
 - Toggle the game's quest POI setting and confirm bridged markers follow it.
 - Test quests whose next step is in a city, cave, dungeon, or another continent.
 - Save Lua errors/taint output and exact client build.
@@ -73,6 +78,6 @@ Exit: no known critical interaction bug and a published compatibility table.
 - Publish source, notices, beta changelog, screenshots, checksums, and known
   limitations together.
 
-Exit: `AtlasContinuum-0.2.0-beta.1.zip` is tested from a clean profile and ready
+Exit: `AtlasContinuum-0.4.0-beta.1.zip` is tested from a clean profile and ready
 for a CurseForge Beta upload. Actual upload requires the owner's CurseForge
 account and final project approval.

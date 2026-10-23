@@ -4,6 +4,12 @@
 local _, ns = ...
 
 ns.MapChangelog = {
+	{ version = "0.4.0-beta.1", date = "2026-10-23", heads = { [1] = "New", [2] = "Improved", }, items = {
+		"|cff6e2c0aSuper-tracked quest guide|r: an optional live gold line runs from your position to the super-tracked quest across the stitched world, including when Blizzard owns the native host-zone pin.",
+		"Focused quests now hide unrelated bridged quest markers, matching the native world map's focused-quest behavior.",
+		"Ready-for-turn-in art and marker glows now preserve Blizzard's campaign, legendary, calling, recurring, important and meta quest treatments.",
+		"Options can now set bridged quest-marker opacity and hide compact objective-progress labels independently.",
+	} },
 	{ version = "0.3.0-beta.1", date = "2026-10-23", heads = { [1] = "New", [5] = "Improved", }, items = {
 		"|cff6e2c0aQuest marker states|r: bridged active quests now distinguish in-progress, watched, ready for turn-in, failed and temporarily disabled quests. The super-tracked quest is larger, raised above the others and uses Blizzard's selected marker.",
 		"|cff6e2c0aObjective progress|r: watched and super-tracked bridged markers show a compact progress label. Their tooltips include waypoint text, up to five objectives, completed-objective colouring, quest type and time remaining when Blizzard provides them.",

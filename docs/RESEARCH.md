@@ -74,6 +74,16 @@ Important implementation files:
   map canvas's current `uiMapID`. Atlas Continuum can safely project missing
   point markers into stitched world coordinates; cross-zone objective-area
   blobs need their own projected renderer and remain a separate milestone.
+- Blizzard's active-quest provider shows only the focused quest while a quest
+  is focused. Atlas Continuum mirrors that rule for projected pins and listens
+  to the map canvas's focus callbacks.
+- Blizzard's quest POI style varies turn-in art and outer glows by quest
+  classification. The bridge reuses those atlas families for campaign,
+  legendary, calling, recurring, important, and meta quests.
+- A super-tracked quest can retain a waypoint even when its host-zone pin is
+  native. The guide renderer therefore resolves that waypoint independently of
+  bridged-pin de-duplication and projects both player and target into the same
+  stitched coordinate space.
 - The generated data is tied to a client build. New patches, phased maps, new
   continents, or changed art IDs require regeneration and visual validation.
 
