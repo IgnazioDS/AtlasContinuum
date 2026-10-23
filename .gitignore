@@ -1,2 +1,6 @@
 .DS_Store
 dist/*.zip
+.gitnexus/
+.claude/
+AGENTS.md
+CLAUDE.md

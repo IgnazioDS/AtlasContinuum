@@ -43,19 +43,19 @@ local ns = {
 	end,
 }
 
-assert(loadfile(auditPath))("OpenMap", ns)
+assert(loadfile(auditPath))("AtlasContinuum", ns)
 
-assert(type(OpenMapRetailLab) == "table")
-local result = OpenMapRetailLab.RunAudit()
+assert(type(AtlasContinuumLab) == "table")
+local result = AtlasContinuumLab.RunAudit()
 
 assert(result.total == 3, "expected three discovered maps")
 assert(result.covered == 1, "expected one fully covered map")
 assert(#result.missingData == 1 and result.missingData[1].mapID == 103)
 assert(#result.missingArt == 1 and result.missingArt[1].mapID == 102)
 assert(#result.missingRect == 1 and result.missingRect[1].mapID == 103)
-assert(OpenMapRetailLabDB.lastAudit == result, "audit result was not persisted")
+assert(AtlasContinuumLabDB.lastAudit == result, "audit result was not persisted")
 
-SlashCmdList.OPENMAPRETAILLABAUDIT("missing")
+SlashCmdList.ATLASCONTINUUMAUDIT("missing")
 assert(#messages >= 5, "slash command did not print summary and missing rows")
 
 print("OK: RetailLab/Audit.lua behavior")

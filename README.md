@@ -1,37 +1,50 @@
-# OpenMap Retail Lab
+# Atlas Continuum
 
-An attributed, Retail-focused development fork of **OpenMap**. It keeps the
-seamless world-map experience—zooming from Azeroth into continents, zones,
-cities, caves, and detailed terrain—inside Blizzard's normal map frame so the
-quest log and compatible map pins continue to work.
+**Every horizon, one map.** Atlas Continuum is a Retail World of Warcraft addon
+that turns Blizzard's world map into one continuous, detailed canvas. Zoom from
+Azeroth into continents, zones, cities, caves, and dungeons without losing the
+normal quest log, Blizzard controls, or compatible map pins.
 
-This repository starts from OpenMap `v0.7.1-beta-retail`, released for WoW
-Retail 12.1.5 on 21 October 2026. The upstream code is MIT-licensed. Blizzard
-map art and textures derived from it are not covered by that MIT license; see
-[`NOTICE.md`](NOTICE.md) and [`OpenMap/Media/Textures/Retail/NOTICE.md`](OpenMap/Media/Textures/Retail/NOTICE.md).
+Atlas Continuum is an independent fork of the MIT-licensed OpenMap
+`v0.7.1-beta-retail`. Its first Retail-specific feature is a cross-zone active
+quest bridge: Blizzard creates quest pins only for the single map hosted under
+the stitched view, so Atlas Continuum adds only the missing ongoing-quest
+positions across the other visible zones. Native Blizzard quest pins remain
+untouched.
 
 ## Status
 
-- Working Retail baseline vendored from the public OpenMap release.
+- Beta version: `0.2.0-beta.1`.
 - Interface target: `120105` (Retail 12.1.5).
-- Retail datasets are generated against build `12.1.5.70448`.
-- `/omraudit` adds a live client-vs-dataset coverage report.
-- Static validation and reproducible zip packaging are included.
-- In-game smoke testing is still required on a local Retail installation.
+- Retail datasets: build `12.1.5.70448`.
+- Quest bridge behavior is covered by a mocked Lua test.
+- TOC entries, Retail data selection, Lua syntax, diagnostics, and packaging are
+  validated by `make check`.
+- An in-game smoke pass is still required before a public CurseForge upload.
 
 ## Install for testing
 
-1. Copy the `OpenMap` folder into:
-   `World of Warcraft/_retail_/Interface/AddOns/`
-2. Start or reload WoW and enable **OpenMap Retail Lab**.
+1. Copy the `AtlasContinuum` folder into
+   `World of Warcraft/_retail_/Interface/AddOns/`.
+2. Enable **Atlas Continuum** at the character screen.
 3. Open the world map with `M`.
-4. Run `/omraudit`, then `/omraudit missing` if drift is reported.
+4. Run `/acaudit`, then `/acaudit missing` if drift is reported.
 
-Do not install this beside another copy of OpenMap. Both use the same addon
-folder, global API, and saved-variable names. Disable map-frame modifiers such
-as Mapster or Leatrix Maps during the first smoke test.
+Do not enable Atlas Continuum and OpenMap at the same time. Their package names
+and saved variables are distinct, but both intentionally control Blizzard's
+world-map canvas.
 
-## Develop
+## Commands
+
+- `/atlascontinuum` or `/acmap` — open settings.
+- `/atlascontinuum debug` — map performance overlay.
+- `/atlascontinuum bench` — map performance benchmark.
+- `/atlascontinuum pins` — saved map pins.
+- `/atlascontinuum news` — release notes.
+- `/acaudit` — compare the running Retail client with the stitching dataset.
+- `/acaudit missing` — print missing map IDs, capped to avoid chat spam.
+
+## Develop and package
 
 ```sh
 make check
@@ -39,28 +52,21 @@ make package
 make install
 ```
 
-The package is written to `dist/` and contains an installable `OpenMap/`
-folder. `make install` creates a development symlink in the locally detected
-Retail client; pass `RETAIL_DIR="/path/to/_retail_"` to select one explicitly.
-It refuses to replace an existing `AddOns/OpenMap` installation.
+`make package` produces `dist/AtlasContinuum-<version>.zip` with the correct
+installable folder. `make install` creates a development symlink in the locally
+detected Retail client; pass `RETAIL_DIR="/path/to/_retail_"` to select one.
+The installer refuses to replace an unrelated addon or symlink.
 
-See [`docs/RESEARCH.md`](docs/RESEARCH.md) for the technical model and
-[`docs/PLAN.md`](docs/PLAN.md) for the delivery roadmap.
+See [RESEARCH.md](docs/RESEARCH.md), [PLAN.md](docs/PLAN.md),
+[BRAND.md](docs/BRAND.md), and [CURSEFORGE.md](docs/CURSEFORGE.md).
 
-## Useful commands
+## Credits and licenses
 
-- `/openmap` — OpenMap settings.
-- `/openmap debug` — upstream diagnostic overlay.
-- `/openmap bench` — upstream map performance benchmark.
-- `/omraudit` — compare the running Retail client's zone/city maps with the
-  generated stitching dataset.
-- `/omraudit missing` — print missing map IDs (capped to avoid chat spam).
-
-## Upstream
+Atlas Continuum is based on OpenMap `v0.7.1-beta-retail`. The original MIT
+copyright and license are preserved in `AtlasContinuum/LICENSE.txt`, and full
+provenance is recorded in [NOTICE.md](NOTICE.md). Bundled libraries retain their
+own licenses. Blizzard map art and derived textures are not granted by the MIT
+license; see the asset notice before redistribution.
 
 - [OpenMap on CurseForge](https://www.curseforge.com/wow/addons/openmap)
-- [Retail baseline release](https://www.curseforge.com/wow/addons/openmap/files/9274335)
-
-The upstream GitHub repository was being transitioned when this project was
-created. Reconcile this fork with the public repository, including its omitted
-data-generation tools, as soon as that source is available again.
+- [Imported OpenMap Retail release](https://www.curseforge.com/wow/addons/openmap/files/9274335)

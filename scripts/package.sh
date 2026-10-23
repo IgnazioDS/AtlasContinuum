@@ -2,7 +2,7 @@
 set -eu
 
 PROJECT_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-TOC="$PROJECT_ROOT/OpenMap/OpenMap_Mainline.toc"
+TOC="$PROJECT_ROOT/AtlasContinuum/AtlasContinuum_Mainline.toc"
 DIST="$PROJECT_ROOT/dist"
 
 "$PROJECT_ROOT/scripts/check.sh"
@@ -14,12 +14,12 @@ if [ -z "$version" ]; then
 fi
 
 mkdir -p "$DIST"
-artifact="$DIST/OpenMap-Retail-$version.zip"
-temporary="$DIST/.OpenMap-Retail-$version.$$.tmp.zip"
+artifact="$DIST/AtlasContinuum-$version.zip"
+temporary="$DIST/.AtlasContinuum-$version.$$.tmp.zip"
 
 (
 	cd "$PROJECT_ROOT"
-	zip -qr "$temporary" OpenMap -x '*/.DS_Store'
+	zip -qr "$temporary" AtlasContinuum -x '*/.DS_Store'
 )
 
 unzip -tq "$temporary" >/dev/null

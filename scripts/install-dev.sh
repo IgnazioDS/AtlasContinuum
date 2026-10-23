@@ -2,7 +2,7 @@
 set -eu
 
 PROJECT_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-SOURCE="$PROJECT_ROOT/OpenMap"
+SOURCE="$PROJECT_ROOT/AtlasContinuum"
 retail_dir=${1:-}
 
 if [ -z "$retail_dir" ] && command -v mdfind >/dev/null 2>&1; then
@@ -15,7 +15,7 @@ if [ -z "$retail_dir" ]; then
 fi
 
 addons="$retail_dir/Interface/AddOns"
-destination="$addons/OpenMap"
+destination="$addons/AtlasContinuum"
 
 if [ ! -d "$addons" ]; then
 	echo "ERROR: AddOns directory does not exist: $addons" >&2

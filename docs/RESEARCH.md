@@ -45,15 +45,16 @@ Important implementation files:
 
 | Concern | File |
 | --- | --- |
-| Addon lifecycle/settings | `OpenMap/Core.lua`, `OpenMap/Init.lua` |
-| Retail tuning | `OpenMap/Data/Retail/Client.lua` |
-| World geometry/classification | `OpenMap/Data/Retail/World.lua` |
-| Stitched renderer | `OpenMap/Map/Stitch.lua` |
-| Zoom, pan, and map-frame integration | `OpenMap/Map/WorldMap.lua` |
-| Detailed minimap layer | `OpenMap/Map/Close.lua` |
-| Dungeon/cave transitions | `OpenMap/Map/Dungeons.lua` |
-| Public integration API | `OpenMap/API.lua` |
-| Patch-drift detector added here | `OpenMap/RetailLab/Audit.lua` |
+| Addon lifecycle/settings | `AtlasContinuum/Core.lua`, `AtlasContinuum/Init.lua` |
+| Retail tuning | `AtlasContinuum/Data/Retail/Client.lua` |
+| World geometry/classification | `AtlasContinuum/Data/Retail/World.lua` |
+| Stitched renderer | `AtlasContinuum/Map/Stitch.lua` |
+| Zoom, pan, and map-frame integration | `AtlasContinuum/Map/WorldMap.lua` |
+| Cross-zone active quest bridge | `AtlasContinuum/Map/QuestBridge.lua` |
+| Detailed minimap layer | `AtlasContinuum/Map/Close.lua` |
+| Dungeon/cave transitions | `AtlasContinuum/Map/Dungeons.lua` |
+| Public integration API | `AtlasContinuum/API.lua` |
+| Patch-drift detector | `AtlasContinuum/RetailLab/Audit.lua` |
 
 ## Retail-specific findings
 
@@ -88,7 +89,9 @@ The Blizzard map canvas exposes pan/zoom entry points such as
 `InstantPanAndZoom`, `SetPanTarget`, scale getters, and view rectangles. These
 are implementation dependencies and must be checked after every major patch.
 
-OpenMap publishes `OpenMapAPI` (major 1, version 2) for integrations. Its
+Upstream OpenMap published `OpenMapAPI` (major 1, version 2). Atlas Continuum
+publishes the independently named `AtlasContinuumAPI` with equivalent initial
+surface. Its
 coordinate conversion, view events, menu toggles, and dungeon-card sections
 should remain backward-compatible throughout this fork.
 

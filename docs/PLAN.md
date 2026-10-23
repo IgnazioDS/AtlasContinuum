@@ -1,84 +1,64 @@
 # Delivery plan
 
-The baseline import and project scaffolding are complete. The remaining work is
-ordered to protect the two hardest qualities of this addon: visual continuity
-and compatibility with Blizzard/addon map pins.
+## Completed foundation
 
-## Phase 0 — Baseline and provenance (complete)
+- Imported OpenMap `v0.7.1-beta-retail` with license and asset provenance.
+- Established the independent **Atlas Continuum** folder, manifest, saved
+  variables, API, commands, addon-message prefix, UI globals, and package name.
+- Added a Retail coverage audit and repeatable static/package validation.
+- Diagnosed Blizzard's single-host-map quest-provider limitation.
+- Added a cross-zone active quest bridge that preserves native quest pins and
+  renders only missing ongoing quests.
+- Added a mocked Retail behavior test for filtering, projection, rendering, and
+  quest super-tracking.
 
-- Identify OpenMap and verify its public Retail release.
-- Vendor `v0.7.1-beta-retail` without dropping license or asset notices.
-- Record the Retail architecture, APIs, build coupling, risks, and legal
-  boundaries.
-- Add repeatable static checks and zip packaging.
-- Add `/omraudit` to compare the live client with generated world data.
+## Release gate 1 — in-game quest verification
 
-Exit: the repository produces an installable addon zip and all vendored TOC
-entries resolve.
+- Fresh-install the generated beta zip.
+- Test an active quest in the hosted zone and confirm there is no duplicate pin.
+- Test active quests in two neighboring visible zones.
+- Advance an objective and confirm its marker refreshes or moves.
+- Complete a quest and confirm the turn-in marker appears.
+- Click a bridged marker and confirm Blizzard super-tracking updates.
+- Toggle the game's quest POI setting and confirm bridged markers follow it.
+- Test quests whose next step is in a city, cave, dungeon, or another continent.
+- Save Lua errors/taint output and exact client build.
 
-## Phase 1 — Retail smoke test (next)
+Exit: active quests remain visible and interactive with no duplicates or Lua
+errors through progress, completion, host-map switching, and `/reload`.
 
-- Install into a clean `_retail_` AddOns directory with only BugSack/BugGrabber
-  optionally enabled.
-- Test first login, `/reload`, opening/closing the map, windowed/fullscreen map,
-  mouse and trackpad zoom, drag pan, click navigation, and saved view restore.
-- Visit at least one map from each supported continent plus Stormwind,
-  Orgrimmar, Ironforge, Undercity, Dornogal, Silvermoon, and Atal'Aman.
-- Run `/omraudit` and save its result with the exact game build.
-- Capture screenshots at world, continent, zone, city, cave/dungeon, and
-  maximum-detail zoom levels.
-- Profile `/openmap bench`; establish frame-time and memory baselines.
+## Release gate 2 — map smoke matrix
 
-Exit: no Lua errors or taint warnings, no invisible/offset player arrow, and no
-critical visual seams in the smoke matrix.
+- Test first login, windowed/full-screen map, mouse/trackpad zoom, drag pan,
+  click navigation, and saved view restore.
+- Visit representative continents plus Stormwind, Orgrimmar, Ironforge,
+  Undercity, Dornogal, Silvermoon, and Atal'Aman.
+- Run `/acaudit` and retain the result with the exact build.
+- Capture world, continent, zone, city, dungeon, and maximum-detail screenshots.
+- Run `/atlascontinuum bench` and record frame time and memory.
 
-## Phase 2 — Restore reproducible data generation
+Exit: no critical visual seams, offset player arrows, taint, or blocked actions.
 
-- Recover the upstream public repository after its transition, including the
-  `tools/` directory and data-source documentation.
-- Diff the release archive against the source tag/commit and record the exact
-  baseline commit.
-- Make generation accept an explicit WoW client/build input and write to a
-  staging directory.
-- Add deterministic comparisons for `World.lua`, reveal data, minimap data,
-  caves, dungeons, flights, places, tones, and masks.
-- Fail CI when generated outputs differ from committed files.
+## Release gate 3 — compatibility
 
-Exit: a clean machine with the permitted game-data inputs can reproduce every
-generated Retail data file and mask.
+- Test HandyNotes, TomTom, RareScanner, SilverDragon, GatherMate2, and World
+  Quest Tracker one at a time.
+- Verify Leatrix Maps/Mapster conflict messaging.
+- Confirm `AtlasContinuumAPI` callbacks and menu integration with a small test
+  addon.
+- Document known-compatible versions.
 
-## Phase 3 — Retail coverage and quality
+Exit: no known critical interaction bug and a published compatibility table.
 
-- Resolve every actionable `/omraudit` result.
-- Add new continents, zones, cities, phased aliases, and world-yard mappings.
-- Build screenshot fixtures for city alignment and major zone borders.
-- Tune culling/fade thresholds per continent where art density differs.
-- Validate ultrawide, 16:9, 16:10, Retina/high-DPI, and UI scales 75–100%.
-- Test controller/gamepad behavior and combat/open-map transitions.
+## Release gate 4 — publishing
 
-Exit: all supported zone/city maps with usable art and world geometry are
-covered, and the visual regression matrix is accepted.
+- Verify the original icon at in-game, addon-list, and CurseForge thumbnail sizes.
+- Re-check name availability, Blizzard addon policy, CurseForge rules, and
+  derived-asset distribution rights.
+- Run `make check`, `make package`, and a clean install of the exact zip.
+- Publish source, notices, beta changelog, screenshots, checksums, and known
+  limitations together.
 
-## Phase 4 — Compatibility
-
-- Test Blizzard quest/world-quest/scenario pins and waypoint navigation.
-- Test popular Retail pin providers one at a time: HandyNotes, TomTom,
-  RareScanner, SilverDragon, GatherMate2, and World Quest Tracker.
-- Detect conflicting full map modifiers and show one actionable warning.
-- Keep `OpenMapAPI` major 1 compatible and document any version increment.
-
-Exit: a published compatibility table and no known critical interaction bug.
-
-## Phase 5 — Release
-
-- Re-check the current Blizzard UI Add-On Development Policy.
-- Update changelog/version metadata and remove development branding only after
-  upstream coordination determines whether this is a contribution, fork, or
-  successor package.
-- Run `make check`, `make package`, and `unzip -t` on the artifact.
-- Fresh-install the exact zip and repeat the smoke matrix.
-- Publish source, commit/tag provenance, checksums, known limitations, and
-  installation/conflict notes together.
-
-Exit: installable artifact tested from a clean profile, public source and
-license notices available, and rollback artifact retained.
+Exit: `AtlasContinuum-0.2.0-beta.1.zip` is tested from a clean profile and ready
+for a CurseForge Beta upload. Actual upload requires the owner's CurseForge
+account and final project approval.

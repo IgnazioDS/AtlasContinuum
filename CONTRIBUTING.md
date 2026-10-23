@@ -7,7 +7,7 @@ Before submitting a change:
 
 1. Run `make check`.
 2. Test on the exact Retail build declared in the TOC.
-3. Include the output of `/omraudit` for data or map coverage changes.
+3. Include the output of `/acaudit` for data or map coverage changes.
 4. Include before/after screenshots for rendering, masks, alignment, fades, or
    UI changes.
 5. State which map addons were enabled during the test.
