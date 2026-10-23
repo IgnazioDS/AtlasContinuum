@@ -1,151 +1,54 @@
-# Research: how OpenMap works on Retail
+# WorldPane Retail architecture
 
-## Identification and availability
+## Rendering model
 
-The described addon is OpenMap. Its defining behavior is a single pannable,
-zoomable map that blends Blizzard's world, continent, zone, city, cave, and
-minimap art instead of navigating one discrete map page at a time.
+WorldPane augments Blizzard's `WorldMapFrame`. A stitched coordinate system
+places supported Azeroth continents, zones, cities, exploration overlays, and
+detail layers into one pannable canvas. Blizzard remains responsible for the
+host frame, quest log, many pin providers, and native maps outside that shared
+coordinate space.
 
-As of 22 October 2026, OpenMap has an official Retail beta:
+The central rule is ownership by map depth: broad parchment and continent art
+appear at low zoom; zone and city art become authoritative as the view closes
+in. Overlap policies decide which current-Retail layer wins where old and new
+map rectangles intersect.
 
-- Version: `v0.7.1-beta-retail`
-- Game version: Retail 12.1.5
-- CurseForge project: 1735937
-- CurseForge file: 9274335
-- Code license: MIT
-- Retail release archive: about 4.3 MB compressed / 125 MB installed
+## Navigation hierarchy
 
-The release archive was used as the baseline because the upstream GitHub URL
-was temporarily unavailable during a repository transition.
+1. Azeroth uses the stitched canvas.
+2. Wheel zoom and clicks descend into supported continent, zone, and city art.
+3. Detached world spaces and maps without a valid Azeroth rectangle transition
+   to Blizzard's native canvas.
+4. Zooming or navigating outward from the fitted Azeroth view reaches the
+   cosmic map, where Outland, Draenor, and other worlds remain selectable.
+5. Back, right-click, Escape, breadcrumbs, and gamepad actions must preserve a
+   predictable parent chain.
 
-## Runtime architecture
+## Quest bridge
 
-OpenMap is not a replacement web map. It augments Blizzard's
-`WorldMapFrame`, which preserves the quest log, map controls, Blizzard pins,
-and compatible third-party pins.
+Blizzard normally creates quest pins for the single map hosted beneath the
+canvas. A stitched view may expose several zones, so WorldPane asks current
+quest APIs for active waypoints, converts usable positions into stitched world
+coordinates, and adds only markers that native providers did not create.
 
-The stitched coordinate space is rooted at Azeroth `uiMapID 947`:
+The bridge refreshes on quest-log, watch, waypoint, criteria, task, acceptance,
+removal, and turn-in events. It preserves focused-quest behavior and treats
+super-tracking as a stronger visual and navigation state.
 
-1. `C_Map.GetMapRectOnMap(childMapID, 947)` locates continent, zone, and city
-   art in normalized world coordinates.
-2. `C_Map.GetMapArtLayers` and `C_Map.GetMapArtLayerTextures` provide the
-   client's own map tiles.
-3. Generated Retail tables supply map classification, world-yard transforms,
-   exploration/reveal pieces, minimap tiles, caves, dungeons, flights, places,
-   color matching, and territory masks.
-4. The rendering stack cross-fades world art, continent art, zone overlays,
-   city maps, caves, and close-range minimap terrain according to zoom.
-5. View culling and baked layers keep thousands of potential textures from
-   being simultaneously anchored and drawn.
-6. Once panning settles, OpenMap changes the *underlying* Blizzard map to the
-   zone under the view. Blizzard and addon pins therefore query the correct
-   map while the stitched art remains visually continuous.
+## Data and drift
 
-Important implementation files:
+Generated Retail tables describe map rectangles, hierarchy, art, exploration,
+places, caves, dungeons, flights, minimap detail, tones, edits, and territories.
+`RetailLab/Audit.lua` compares those expectations with the running client.
+Missing data, missing art, missing rectangles, and intentional native fallbacks
+are reported separately so a correct transition is not mistaken for a defect.
 
-| Concern | File |
-| --- | --- |
-| Addon lifecycle/settings | `AtlasContinuum/Core.lua`, `AtlasContinuum/Init.lua` |
-| Retail tuning | `AtlasContinuum/Data/Retail/Client.lua` |
-| World geometry/classification | `AtlasContinuum/Data/Retail/World.lua` |
-| Stitched renderer | `AtlasContinuum/Map/Stitch.lua` |
-| Zoom, pan, and map-frame integration | `AtlasContinuum/Map/WorldMap.lua` |
-| Cross-zone active quest bridge | `AtlasContinuum/Map/QuestBridge.lua` |
-| Detailed minimap layer | `AtlasContinuum/Map/Close.lua` |
-| Dungeon/cave transitions | `AtlasContinuum/Map/Dungeons.lua` |
-| Public integration API | `AtlasContinuum/API.lua` |
-| Patch-drift detector | `AtlasContinuum/RetailLab/Audit.lua` |
+## Compatibility and performance
 
-## Retail-specific findings
+WorldPane keeps compatible third-party pins above stitched art and yields window
+ownership where another addon explicitly manages the frame. Art is loaded and
+placed on demand. Debug and benchmark tools expose frame time, update cost,
+memory growth, pin counts, and active art regions.
 
-- Retail's Azeroth contains many more continents than Forever; the client
-  tuning uses a `zoom = 2` detail factor.
-- Retail continent maps vary dramatically in resolution. Detail fade is
-  calculated per continent using density rather than one global threshold.
-- Retail world and continent maps already paint their own sea and coasts, so
-  OpenMap does not replace the sea layer (`sea = false`).
-- Stormwind and some city rectangles derived only from map hierarchy can be
-  offset. The engine falls back to world-position transforms for cities.
-- Undercity and Ironforge are treated as underground cities so their own art
-  remains above surface minimap terrain.
-- Questie-backed townsfolk are disabled on Retail; Retail uses its native pin
-  ecosystem instead.
-- Blizzard's active quest and quest-blob providers both key their output to the
-  map canvas's current `uiMapID`. Atlas Continuum can safely project missing
-  point markers into stitched world coordinates; cross-zone objective-area
-  blobs need their own projected renderer and remain a separate milestone.
-- Blizzard's active-quest provider shows only the focused quest while a quest
-  is focused. Atlas Continuum mirrors that rule for projected pins and listens
-  to the map canvas's focus callbacks.
-- Blizzard's quest POI style varies turn-in art and outer glows by quest
-  classification. The bridge reuses those atlas families for campaign,
-  legendary, calling, recurring, important, and meta quests.
-- A super-tracked quest can retain a waypoint even when its host-zone pin is
-  native. The guide renderer therefore resolves that waypoint independently of
-  bridged-pin de-duplication and projects both player and target into the same
-  stitched coordinate space.
-- Azeroth `947` has a parent cosmic map. Treating it as a terminal root traps
-  users inside Azeroth; Atlas Continuum now hands the view back to Blizzard at
-  minimum zoom so Outland, Draenor, and other world spaces remain available.
-- Voidstorm `2405` and Harandar `2413` are detached children of Quel'Thalas for
-  UI navigation but do not have usable Azeroth stitch geometry. Their medallions
-  are navigation portals to native Blizzard maps, not stitchable land.
-- Retail retains legacy Eastern Kingdoms zone rectangles beneath the rebuilt
-  Quel'Thalas hierarchy. Explicit continent ownership priority is required so
-  the current map generation paints above the legacy one.
-- The generated data is tied to a client build. New patches, phased maps, new
-  continents, or changed art IDs require regeneration and visual validation.
-
-## APIs and compatibility surface
-
-The project relies on Retail's map canvas and `C_Map` APIs, especially:
-
-- `C_Map.GetMapInfo`
-- `C_Map.GetMapChildrenInfo`
-- `C_Map.GetMapInfoAtPosition`
-- `C_Map.GetMapRectOnMap`
-- `C_Map.GetMapArtLayers`
-- `C_Map.GetMapArtLayerTextures`
-- `C_Map.GetWorldPosFromMapPos`
-
-The Blizzard map canvas exposes pan/zoom entry points such as
-`InstantPanAndZoom`, `SetPanTarget`, scale getters, and view rectangles. These
-are implementation dependencies and must be checked after every major patch.
-
-Upstream OpenMap published `OpenMapAPI` (major 1, version 2). Atlas Continuum
-publishes the independently named `AtlasContinuumAPI` with equivalent initial
-surface. Its
-coordinate conversion, view events, menu toggles, and dungeon-card sections
-should remain backward-compatible throughout this fork.
-
-## Legal and distribution boundaries
-
-- Preserve the upstream MIT copyright and license.
-- Preserve Ace3 notices.
-- Do not describe Blizzard-derived texture masks as MIT assets.
-- Do not sell the addon, gate features behind payment, or add advertising.
-- Before publishing, re-check Blizzard's current addon policy and the target
-  distribution platform's rules.
-- This fork should remain clearly attributed and should not imply endorsement
-  by Blizzard or the upstream author.
-
-## Current risks
-
-1. **Missing owned generator toolchain.** The imported runtime archive omits
-   the original `tools/` directory. Generated tables can be audited, but Atlas
-   Continuum needs its own reproducible extractor before it is operationally
-   independent across future Retail patches.
-2. **No in-game test in this workspace.** Static checks cannot detect taint,
-   frame-level conflicts, GPU fill-rate issues, or incorrect visual alignment.
-3. **Patch drift.** Interface `120105` and data build `12.1.5.70448` will age.
-4. **Addon conflicts.** Other map-frame modifiers can rewrite the same zoom,
-   size, scroll, and frame-level behavior.
-5. **Performance.** Retail's high-resolution zones make culling, lazy loading,
-   and memory profiling release blockers rather than later optimizations.
-
-## Sources consulted
-
-- OpenMap CurseForge project and Retail release notes.
-- The downloaded OpenMap Retail source archive and preserved license notices.
-- Blizzard's live MapCanvas/WorldMap implementation as mirrored from the game
-  UI source at `github.com/Gethe/wow-ui-source`.
+Public integrations use `WorldPaneAPI`. Inter-addon pin sharing uses the
+`WorldPane` prefix. Both are versioned independently of display copy.

@@ -1,54 +1,33 @@
-# Atlas Continuum brand guide
+# WorldPane brand
 
-## Core identity
+## Identity
 
-- Name: **Atlas Continuum**
-- Tagline: **Every horizon, one map.**
-- Product description: a seamless, detailed world map for World of Warcraft
-  Retail that preserves Blizzard's map workflow and restores cross-zone active
-  quest visibility.
-- Positioning: exploration-first, technically dependable, and respectful of the
-  game's own visual language.
+- Product: **WorldPane**
+- Tagline: **Every world. One map.**
+- Category: Retail map and minimap addon
+- Working CurseForge slug: `worldpane`
+- Primary command: `/worldpane`
+- Short command: `/wpmap`
+- Diagnostic command: `/wpaudit`
 
-“Continuum” expresses the defining interaction: world, continent, zone, city,
-and close-up detail are scales of one map rather than disconnected pages.
+The name describes the product directly: one pane through which every supported
+world and map depth can be explored. Use `WorldPane` as a single word with a
+capital W and P. Do not shorten the public product name to WP.
 
 ## Voice
 
-Write clearly and confidently, with the calm tone of a good cartographer.
-Prefer concrete claims—“shows missing active quest positions across visible
-zones”—over hype. Never imply that inherited OpenMap work was created from
-scratch, and never call the addon official or Blizzard-endorsed.
+Lead with what the player can do. Prefer concrete language such as “zoom from
+Azeroth into city detail” and “see active quests across visible zones.” Avoid
+claims of total map coverage until the live audit and in-game smoke matrix prove
+it for the current Retail build.
 
-## Visual direction
+## Visual system
 
-- Arcane gold: `#E6B85C` — primary accent and headings.
-- Midnight ink: `#101820` — dark UI and backgrounds.
-- Waypoint blue: `#74B9FF` — links, navigation, and quest affordances.
-- Parchment: `#D8C49A` — warm supporting surface.
+- Accent: parchment gold `#E6B85C`.
+- Supporting tones: ink brown, charcoal, warm parchment, restrained quest gold.
+- Icon: the existing gold compass over a parchment map; no legacy initials.
+- UI: preserve Blizzard's map language while improving hierarchy, alignment,
+  transitions, and information density.
 
-The original icon uses a gold compass whose rings flow into a parchment world
-map, with a waypoint-blue center on midnight ink. Source, listing, and in-game
-variants are in `docs/assets/atlas-continuum-icon-source.png`,
-`docs/assets/atlas-continuum-icon.png`, and
-`AtlasContinuum/Media/Brand/Icon.tga`.
-
-## Naming system
-
-- Addon folder and TOC: `AtlasContinuum`
-- Saved variables: `AtlasContinuumDB`, `AtlasContinuumCharDB`
-- Public API: `AtlasContinuumAPI`
-- Commands: `/atlascontinuum`, `/acmap`, `/acaudit`
-- CurseForge working slug: `atlas-continuum`
-
-The name was selected after a basic marketplace collision check. That check is
-not trademark clearance; re-check CurseForge and broader name availability
-immediately before creating the public project.
-
-## Attribution boilerplate
-
-> Atlas Continuum is an independent fork of the MIT-licensed OpenMap project.
-> OpenMap's original copyright and license are included with the addon.
-
-Keep this statement in the CurseForge description, repository README, and
-release notes.
+Use the bundled legal sentence only where provenance is required. Marketing
+copy should otherwise describe WorldPane on its own merits.

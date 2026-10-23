@@ -45,10 +45,10 @@ local ns = {
 	end,
 }
 
-assert(loadfile(auditPath))("AtlasContinuum", ns)
+assert(loadfile(auditPath))("WorldPane", ns)
 
-assert(type(AtlasContinuumLab) == "table")
-local result = AtlasContinuumLab.RunAudit()
+assert(type(WorldPaneLab) == "table")
+local result = WorldPaneLab.RunAudit()
 
 assert(result.total == 4, "expected four discovered maps")
 assert(result.covered == 2, "expected one stitched and one native map")
@@ -56,9 +56,9 @@ assert(#result.missingData == 1 and result.missingData[1].mapID == 104)
 assert(#result.missingArt == 1 and result.missingArt[1].mapID == 102)
 assert(#result.missingRect == 1 and result.missingRect[1].mapID == 104)
 assert(#result.nativeFallback == 1 and result.nativeFallback[1].mapID == 103)
-assert(AtlasContinuumLabDB.lastAudit == result, "audit result was not persisted")
+assert(WorldPaneLabDB.lastAudit == result, "audit result was not persisted")
 
-SlashCmdList.ATLASCONTINUUMAUDIT("missing")
+SlashCmdList.WORLDPANEAUDIT("missing")
 assert(#messages >= 5, "slash command did not print summary and missing rows")
 
 print("OK: RetailLab/Audit.lua behavior")

@@ -1,0 +1,2 @@
+-- Intentionally empty. Loading this helper asks WoW to hydrate the legacy
+-- saved-variable tables so WorldPane can adopt them during startup.

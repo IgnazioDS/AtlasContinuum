@@ -180,7 +180,7 @@ WorldMapFrame = {
 QuestMapFrame_GetFocusedQuestID = function() return focusedQuest end
 
 local chunk = assert(loadfile(addon_file))
-chunk("AtlasContinuum", ns)
+chunk("WorldPane", ns)
 
 local bridge = assert(ns.QuestBridge)
 assert(bridge.ShouldInclude(quests[1]))

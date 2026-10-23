@@ -1,120 +1,62 @@
 # CurseForge release copy and checklist
 
-## Listing fields
+## Listing
 
-- Project name: **Atlas Continuum**
-- Working slug: `atlas-continuum`
+- Name: **WorldPane**
+- Slug: `worldpane`
 - Category: Map & Minimap
-- Game flavor: Retail
-- Initial release channel: Beta
-- Summary: **One seamless Retail world map, from Azeroth to city detail, with
-  cross-zone active quest positions.**
+- Flavor: Retail
+- Channel: Beta
+- Summary: **One seamless Retail world map with cross-zone active quests.**
 
 ## Description
 
-**Every horizon, one map.**
+**Every world. One map.**
 
-Atlas Continuum transforms the Retail world map into one continuous canvas.
-Zoom smoothly from Azeroth into continents, zones, cities, caves, and dungeons
-while keeping Blizzard's normal map frame, quest log, controls, and compatible
-pins.
-
-Its Retail quest bridge restores the active quest positions that disappear in
-a stitched map: Blizzard supplies quest pins only for the one zone hosted under
-the canvas, while Atlas Continuum may show several zones at once. Atlas
-Continuum preserves native pins and adds only the missing ongoing quests.
+WorldPane turns Retail's world map into one continuous canvas. Zoom from
+Azeroth into continents, zones, cities, caves, and dungeons while keeping the
+normal quest log, controls, and compatible addon pins.
 
 Features:
 
 - Seamless world-to-zone zoom and cross-zone panning.
-- Cosmic-map navigation to Outland, Draenor, and other world spaces.
-- Native detailed-map transitions for detached Retail zones such as Voidstorm
-  and Harandar.
-- Detailed Retail zone, city, cave, and dungeon views.
-- Missing active quest positions across visible zones, with watched, ready,
-  failed, disabled, and super-tracked visual states.
-- Objective progress, richer tooltips, click-to-super-track, focused-quest
-  filtering, marker sizing/opacity, and an optional tracked-only mode.
-- Campaign-aware quest art and an optional live guide line from the player to
-  the super-tracked quest across the stitched world.
-- Blizzard quest log and map controls remain in their normal frame.
-- Dungeon entrances, flight masters, boats, zeppelins, routes, map pins, and
-  drawing tools.
-- Configurable exploration, detail, coordinates, icons, and map window.
-- In-game Retail dataset audit with `/acaudit`.
+- Cosmic navigation to Outland, Draenor, and other world spaces.
+- Native detailed transitions for detached zones such as Voidstorm and
+  Harandar.
+- Active quest positions across every visible zone, without replacing native
+  Blizzard pins.
+- Watched, ready, super-tracked, campaign, recurring, legendary, calling,
+  important, and meta quest treatments.
+- Objective progress, rich quest tooltips, focused-quest filtering, marker
+  controls, and an optional super-tracked guide line.
+- Dungeon entrances and maps, flight masters, routes, saved pins, drawing
+  tools, exploration controls, and live coverage diagnostics.
 
-Atlas Continuum is an independent fork of the MIT-licensed OpenMap project.
-OpenMap's original copyright and license are included with the addon. World of
-Warcraft and its art are trademarks/property of Blizzard Entertainment; Atlas
-Continuum is not affiliated with or endorsed by Blizzard.
+WorldPane began from MIT-licensed OpenMap code; required attribution and the
+mixed-license terms are bundled with every release. WorldPane is not affiliated
+with or endorsed by Blizzard Entertainment.
 
 ## Beta notes
 
-- Do not enable Atlas Continuum and OpenMap together; both control the same map
-  canvas.
-- The active-quest bridge intentionally excludes hidden/internal quests and
-  task/bounty entries handled by Blizzard's other map providers.
-- A quest whose next waypoint has no usable position on the stitched Azeroth
-  map cannot be rendered by the bridge.
-- Voidstorm and Harandar deliberately use Blizzard's native map canvas because
-  they do not share Azeroth's stitched world-coordinate space.
+- A quest without a usable current waypoint cannot be placed.
+- Voidstorm and Harandar use Blizzard's native canvas because they do not share
+  the stitched Azeroth coordinate space.
+- The archive includes a tiny load-on-demand helper that migrates settings from
+  the previous package identity; it contains no map implementation.
 
-## Screenshots to capture
+## Release checklist
 
-1. Whole-world view showing the continuous parchment.
-2. Continent-to-zone transition.
-3. City detail.
-4. Two visible neighboring zones with bridged active quest markers.
-5. Quest marker tooltip, campaign styling, and super-tracked guide line.
-6. Dungeon map and side panel.
-7. Settings menu.
-
-## Before upload
-
-- Confirm the project name and slug are still available.
-- Upload `docs/assets/atlas-continuum-icon.png` as the project icon.
-- Re-check Blizzard's current UI Add-On Development Policy and CurseForge rules,
-  especially redistribution of derived map masks.
+- Confirm the name and slug remain available.
+- Upload `docs/assets/worldpane-icon.png` as the project icon.
 - Run `make check` and `make package`.
 - Install the exact generated zip into a clean Retail profile.
-- Test login, `/reload`, windowed/full-screen map, zoom, pan, quest progress,
-  quest turn-in, super-tracking, city alignment, and saved settings.
-- Test with no other addons, then with common pin providers.
-- Upload `dist/AtlasContinuum-0.5.0-beta.1.zip` as a Beta file.
-- Publish the source and `NOTICE.md` with the release.
+- Test login, `/reload`, windowed and maximized map modes, zoom, pan, cosmic
+  navigation, quest progress, quest turn-in, super-tracking, city alignment,
+  native transitions, and saved-settings migration.
+- Test without other addons, then with common pin providers.
+- Upload `dist/WorldPane-0.1.0-beta.1.zip` as a Beta file.
+- Publish the source, `NOTICE.md`, and license files with the release.
 
-## Policy notes
-
-- Distribute the addon free of charge with unobfuscated, publicly viewable code.
-- Keep advertisements and donation requests out of the in-game UI.
-- Keep the archive to one `AtlasContinuum/` root containing the matching
-  `AtlasContinuum_Mainline.toc`.
-- The code/license requirements are satisfied by the current archive; derived
-  Blizzard map-mask redistribution still needs a final rights/policy review.
-
-## Initial changelog
-
-### New
-
-- Cosmic-map access to Outland, Draenor, and other worlds by zooming out from
-  Azeroth.
-- Native detailed-map transitions for Voidstorm and Harandar.
-- Status-aware cross-zone active quest markers on the seamless map.
-- Objective progress, enhanced quest tooltips, marker sizing, and tracked-only
-  mode.
-- A live player-to-objective guide line for the super-tracked quest.
-
-### Improved
-
-- Quel'Thalas detail wins cleanly over legacy Eastern Kingdoms zone rectangles,
-  and Silvermoon's detailed city map no longer receives a conflicting minimap
-  band.
-- Focused quests now hide unrelated bridged pins, matching Blizzard's native
-  world-map behavior.
-- Ready-for-turn-in markers and glows preserve campaign, legendary, recurring,
-  important, calling, and meta quest treatments.
-- Quest marker opacity and progress-label visibility are configurable.
-
-### Attribution
-
-- Based on OpenMap `v0.7.1-beta-retail`; original MIT notices preserved.
+The installable archive must contain both `WorldPane/` and the load-on-demand
+`AtlasContinuum/` settings-migration helper. The latter is a compatibility
+folder, not the public product name.

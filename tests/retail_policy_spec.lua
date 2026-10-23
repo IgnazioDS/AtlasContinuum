@@ -1,7 +1,7 @@
 local clientPath = assert(arg[1], "path to Client.lua is required")
 
 local ns = {}
-assert(loadfile(clientPath))("AtlasContinuum", ns)
+assert(loadfile(clientPath))("WorldPane", ns)
 
 local policy = assert(ns.ClientMaps, "Retail client policy was not loaded")
 assert(policy.cityMiniOf[2393] == 0, "Silvermoon must not receive the outdoor minimap overlay")

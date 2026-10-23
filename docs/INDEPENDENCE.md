@@ -1,43 +1,31 @@
-# Atlas Continuum independence standard
+# WorldPane independence model
 
-## What independent means for this project
+WorldPane has no runtime dependency on another map addon. Its folder, globals,
+saved variables, commands, public API, addon-message prefix, settings category,
+validation, package, documentation, and support destination are owned and
+versioned here.
 
-Atlas Continuum is already a separate addon product: it has its own repository,
-package name, saved variables, public API, commands, inter-addon protocol,
-branding, diagnostics, tests, and release artifacts. It has no runtime or
-installation dependency on OpenMap. The imported `v0.7.1-beta-retail` release
-is a frozen historical baseline; future Atlas Continuum work does not require
-upstream releases or permission beyond the granted MIT license.
+The release includes a small load-on-demand compatibility folder solely to let
+WoW hydrate saved variables written under the previous package identity. It has
+no map engine and can be retired after a documented migration window.
 
-The current codebase remains a derivative fork. The OpenMap copyright and MIT
-license notices must stay with inherited and modified inherited files. Product
-and maintenance independence does not erase provenance.
+## License boundary
 
-## Completion criteria
+The codebase is not accurately described as wholly proprietary. The historical
+foundation, including the original OpenMap-derived line and additions published
+through commit `5e248565f8b75993ecdd15d81a941518f06cc657`, remains MIT-licensed.
+Original WorldPane work published after that boundary is All Rights Reserved
+unless a file says otherwise. Existing MIT grants cannot be withdrawn.
 
-Atlas Continuum can be called operationally independent when all of the
-following are true:
+Operational independence and copyright exclusivity are different goals.
+WorldPane has the former. Achieving a wholly proprietary implementation would
+require a separately managed clean-room rewrite that does not copy protected
+expression from this repository.
 
-1. Retail map tables and derived masks can be regenerated from documented
-   Blizzard client inputs by Atlas Continuum-owned tools.
-2. Patch drift is detected automatically and classified as stitchable,
-   native-transition, unsupported, or intentionally excluded.
-3. Navigation, stitching policy, quests, saved-data migrations, and packaging
-   have automated regression coverage owned by this repository.
-4. A clean Retail smoke matrix is completed for every supported client build,
-   including world-space navigation, representative zones/cities, quests,
-   `/reload`, combat lockdown, and common map addons.
-5. Source hosting, issue tracking, release notes, checksums, CurseForge files,
-   and compatibility policy are maintained under Atlas Continuum accounts.
-6. Every redistributed code and art asset has documented provenance and a
-   redistribution basis.
+## Publication rules
 
-## Clean-room option
-
-If the goal changes from operational independence to a codebase with no
-inherited OpenMap implementation, create a separate clean-room project. One
-team writes behavior-only specifications and public API tests; another team,
-without access to OpenMap source, implements them against Blizzard's APIs.
-That is a new engineering program. Renaming symbols, rewriting comments, or
-removing notices from this repository would not make the current fork
-clean-room and would violate its license obligations.
+- Keep the full legacy MIT notice in every source and binary-style package.
+- Keep source visible and unobfuscated for World of Warcraft addon policy.
+- Distribute the addon free of charge.
+- Keep third-party and Blizzard-asset notices intact.
+- Never describe inherited MIT material as newly exclusive WorldPane code.

@@ -1,58 +1,43 @@
-# Atlas Continuum
+# WorldPane
 
-**Every horizon, one map.** Atlas Continuum is a Retail World of Warcraft addon
-that turns Blizzard's world map into one continuous, detailed canvas. Zoom from
-Azeroth into continents, zones, cities, caves, and dungeons without losing the
-normal quest log, Blizzard controls, or compatible map pins.
+**Every world. One map.** WorldPane turns the Retail World of Warcraft map into
+one continuous, detailed canvas. Move from Azeroth to continents, zones, cities,
+caves, and dungeons while retaining Blizzard's quest log, controls, and
+compatible map pins.
 
-Atlas Continuum is an independently maintained fork of the MIT-licensed OpenMap
-`v0.7.1-beta-retail`; the imported release is a frozen historical baseline, not
-a runtime dependency. Its first Retail-specific feature is a cross-zone active
-quest bridge: Blizzard creates quest pins only for the single map hosted under
-the stitched view, so Atlas Continuum adds only the missing ongoing-quest
-positions across the other visible zones. Native Blizzard quest pins remain
-untouched.
+WorldPane is an independent product with its own addon identity, saved data,
+API, inter-addon protocol, validation, packaging, and support workflow.
 
-## Status
+## Current beta
 
-- Beta version: `0.5.0-beta.1`.
-- Interface target: `120105` (Retail 12.1.5).
-- Retail datasets: build `12.1.5.70448`.
-- Bridged quests distinguish watched, super-tracked, ready, failed, disabled,
-  campaign, important, recurring, legendary, calling, and meta states.
-- Focused-quest filtering, configurable marker size/opacity/progress labels, and
-  a live player-to-super-tracked-quest guide line are included.
-- Zooming out beyond Azeroth reaches Blizzard's cosmic map for Outland,
-  Draenor, and other world spaces.
-- Voidstorm and Harandar use intentional native-map transitions; overlapping
-  Quel'Thalas/Eastern Kingdoms detail and Silvermoon close-up banding have
-  targeted Retail policies.
-- Quest bridge behavior is covered by a mocked Lua test.
-- TOC entries, Retail data selection, Lua syntax, diagnostics, and packaging are
-  validated by `make check`.
-- An in-game smoke pass is still required before a public CurseForge upload.
+- Version `0.1.0-beta.1`; Retail interface `120105`.
+- Cross-zone active quest markers preserve watched, super-tracked, ready,
+  campaign, recurring, legendary, calling, important, and meta treatments.
+- Objective progress, focused-quest filtering, rich tooltips, marker controls,
+  and an optional guide line to the super-tracked quest.
+- Zooming beyond Azeroth reaches Blizzard's cosmic map for Outland, Draenor,
+  and other world spaces.
+- Voidstorm and Harandar use intentional native-map transitions.
+- Targeted current-Retail policies improve Quel'Thalas overlap and Silvermoon
+  close-up rendering.
+- Existing settings from the previous package identity migrate automatically.
 
-## Install for testing
+## Install
 
-1. Copy the `AtlasContinuum` folder into
-   `World of Warcraft/_retail_/Interface/AddOns/`.
-2. Enable **Atlas Continuum** at the character screen.
-3. Open the world map with `M`.
-4. Run `/acaudit`, then `/acaudit missing` if drift is reported.
-
-Do not enable Atlas Continuum and OpenMap at the same time. Their package names
-and saved variables are distinct, but both intentionally control Blizzard's
-world-map canvas.
+Extract the release archive into `_retail_/Interface/AddOns/`. The archive
+contains the `WorldPane` addon and a tiny load-on-demand migration helper. Enable
+**WorldPane**, open the map with `M`, and use `/wpaudit` after major Retail
+patches to check map-data coverage.
 
 ## Commands
 
-- `/atlascontinuum` or `/acmap` — open settings.
-- `/atlascontinuum debug` — map performance overlay.
-- `/atlascontinuum bench` — map performance benchmark.
-- `/atlascontinuum pins` — saved map pins.
-- `/atlascontinuum news` — release notes.
-- `/acaudit` — compare the running Retail client with the stitching dataset.
-- `/acaudit missing` — print missing map IDs, capped to avoid chat spam.
+- `/worldpane` or `/wpmap` — settings.
+- `/worldpane debug` — performance overlay.
+- `/worldpane bench` — performance benchmark.
+- `/worldpane pins` — saved pins.
+- `/worldpane news` — release notes.
+- `/wpaudit` — compare the current Retail client with the stitched dataset.
+- `/wpaudit missing` — list missing map IDs.
 
 ## Develop and package
 
@@ -62,22 +47,15 @@ make package
 make install
 ```
 
-`make package` produces `dist/AtlasContinuum-<version>.zip` with the correct
-installable folder. `make install` creates a development symlink in the locally
-detected Retail client; pass `RETAIL_DIR="/path/to/_retail_"` to select one.
-The installer refuses to replace an unrelated addon or symlink.
+`make package` creates `dist/WorldPane-<version>.zip`. `make install` safely
+links both package folders into a detected Retail client; pass
+`RETAIL_DIR="/path/to/_retail_"` to select one explicitly.
 
-See [RESEARCH.md](docs/RESEARCH.md), [PLAN.md](docs/PLAN.md),
-[INDEPENDENCE.md](docs/INDEPENDENCE.md), [BRAND.md](docs/BRAND.md), and
-[CURSEFORGE.md](docs/CURSEFORGE.md).
+## Licensing and provenance
 
-## Credits and licenses
-
-Atlas Continuum is based on OpenMap `v0.7.1-beta-retail`. The original MIT
-copyright and license are preserved in `AtlasContinuum/LICENSE.txt`, and full
-provenance is recorded in [NOTICE.md](NOTICE.md). Bundled libraries retain their
-own licenses. Blizzard map art and derived textures are not granted by the MIT
-license; see the asset notice before redistribution.
-
-- [OpenMap on CurseForge](https://www.curseforge.com/wow/addons/openmap)
-- [Imported OpenMap Retail release](https://www.curseforge.com/wow/addons/openmap/files/9274335)
+WorldPane is a mixed-license project: the historical MIT foundation remains
+MIT, while original work after the documented boundary is All Rights Reserved.
+WorldPane began from MIT-licensed OpenMap code; the required notice and exact
+boundary are bundled in [NOTICE.md](NOTICE.md) and [LICENSE.md](LICENSE.md).
+Third-party libraries retain their own licenses. Blizzard map art is not
+licensed by the software licenses.

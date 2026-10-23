@@ -2,7 +2,7 @@
 set -eu
 
 PROJECT_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-TOC="$PROJECT_ROOT/AtlasContinuum/AtlasContinuum_Mainline.toc"
+TOC="$PROJECT_ROOT/WorldPane/WorldPane_Mainline.toc"
 DIST="$PROJECT_ROOT/dist"
 
 "$PROJECT_ROOT/scripts/check.sh"
@@ -14,14 +14,20 @@ if [ -z "$version" ]; then
 fi
 
 mkdir -p "$DIST"
-artifact="$DIST/AtlasContinuum-$version.zip"
-temporary="$DIST/.AtlasContinuum-$version.$$.tmp.zip"
+artifact="$DIST/WorldPane-$version.zip"
+temporary="$DIST/.WorldPane-$version.$$.tmp.zip"
 
 (
 	cd "$PROJECT_ROOT"
-	zip -qr "$temporary" AtlasContinuum -x '*/.DS_Store'
+	zip -qr "$temporary" WorldPane AtlasContinuum -x '*/.DS_Store'
 )
 
 unzip -tq "$temporary" >/dev/null
+if ! unzip -Z1 "$temporary" | grep -Fqx 'WorldPane/WorldPane_Mainline.toc' \
+	|| ! unzip -Z1 "$temporary" | grep -Fqx 'AtlasContinuum/AtlasContinuum_Mainline.toc'; then
+	echo "ERROR: package roots are incomplete" >&2
+	rm -f "$temporary"
+	exit 1
+fi
 mv -f "$temporary" "$artifact"
 echo "$artifact"
