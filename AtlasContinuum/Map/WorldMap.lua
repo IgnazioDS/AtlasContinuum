@@ -245,6 +245,24 @@ local function KeepPadCursor(fn, ...)
 end
 mod.KeepPadCursor = KeepPadCursor
 
+-- Leave the stitched canvas for a native Blizzard map. This deliberately is not `Switch`: a switch
+-- keeps the same stitched-world view while its hidden host map changes, whereas these maps have their
+-- own coordinate spaces and should receive Blizzard's normal whole-map reset.
+local function OpenNativeMap(mapID)
+	if not mapID or mapID == 0 then return false end
+	anim = nil
+	local ok, err = KeepPadCursor(pcall, map.SetMapID, map, mapID)
+	if not ok then geterrorhandler()(err) return false end
+	return true
+end
+
+local function OpenParentMap()
+	-- The hosted map may still be a zone for a fraction of a second after the stitched view reaches
+	-- minimum zoom. Navigate from the stitched root, not that implementation-detail host map.
+	local info = map and C_Map.GetMapInfo(active and WORLD or (map:GetMapID() or WORLD))
+	return info and OpenNativeMap(info.parentMapID) or false
+end
+
 -- in combat in the gamepad's UI: a map change of OpenMap's then would have Blizzard set the map's
 -- gamepad bindings again (its footer, OnMapChanged) from OpenMap's code, which the game blocks in
 -- combat, leaving the pad's buttons wrong. Such changes wait (Dungeons.lua)
@@ -277,6 +295,9 @@ end
 -- wheel: zoom about the point under the cursor
 local function ZoomAtCursor(factor)
 	local u, v, zoom = View()
+	-- Azeroth is not the top of Retail's map hierarchy. At the fitted world view, one more zoom-out
+	-- opens Blizzard's cosmic map so Outland, Draenor and the other world spaces remain reachable.
+	if factor < 1 and zoom <= 1.001 and OpenParentMap() then return end
 	local sx, sy = CursorOffset()
 	local pu, pv = PerPx(zoom)
 	local target = Clamp((anim and anim.mode == "anchor" and anim.target or zoom) * factor, 1, MaxZoomAt(u + sx * pu, v + sy * pv))
@@ -742,6 +763,12 @@ local function OnCanvasClick(_, button)
 	local _, _, zoom = View()
 	local chain = S.ChainAt(u, v)
 	if button == "LeftButton" then
+		-- Detached zones can appear as medallions on Azeroth while their detailed art belongs to another
+		-- world space. Open them natively instead of pretending they have an Azeroth stitch rectangle.
+		local away = ns.ClientMaps and ns.ClientMaps.awayMaps
+		for i = #chain, 1, -1 do
+			if away and away[chain[i]] then OpenNativeMap(chain[i]) return true end
+		end
 		for _, id in ipairs(chain) do
 			if id ~= WORLD and Stitchable(id) and FitZoom(id) > zoom * 1.05 then
 				local l, r, t, b = S.Rect(id)
@@ -751,6 +778,7 @@ local function OnCanvasClick(_, button)
 		end
 	elseif button == "RightButton" then
 		if mod.ClearFlightRoute then mod:ClearFlightRoute() end
+		if zoom <= 1.05 and OpenParentMap() then return true end
 		-- (a city's map is its continent's child in the game's tables: out of it, its own zone comes
 		-- first, as out of any other part of that zone; ns.MapCityZones, banners.py)
 		local zone = ns.MapCityZones and ns.MapCityZones[chain[#chain]]

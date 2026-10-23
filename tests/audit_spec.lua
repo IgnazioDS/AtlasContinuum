@@ -10,7 +10,8 @@ end
 local maps = {
 	{ mapID = 101, name = "Ready Zone" },
 	{ mapID = 102, name = "Artless City" },
-	{ mapID = 103, name = "New Patch Zone" },
+	{ mapID = 103, name = "Detached Zone" },
+	{ mapID = 104, name = "New Patch Zone" },
 }
 
 C_Map = {
@@ -22,7 +23,7 @@ C_Map = {
 	end,
 	GetMapRectOnMap = function(mapID, worldMapID)
 		assert(worldMapID == 947)
-		if mapID == 103 then return nil end
+		if mapID == 103 or mapID == 104 then return nil end
 		return 0.1, 0.2, 0.3, 0.4
 	end,
 	GetMapArtLayers = function(mapID)
@@ -38,6 +39,7 @@ end
 local messages = {}
 local ns = {
 	MapWorld = { zones = { [101] = 1, [102] = 2 } },
+	ClientMaps = { awayMaps = { [103] = true } },
 	Print = function(_, formatString, ...)
 		messages[#messages + 1] = formatString:format(...)
 	end,
@@ -48,11 +50,12 @@ assert(loadfile(auditPath))("AtlasContinuum", ns)
 assert(type(AtlasContinuumLab) == "table")
 local result = AtlasContinuumLab.RunAudit()
 
-assert(result.total == 3, "expected three discovered maps")
-assert(result.covered == 1, "expected one fully covered map")
-assert(#result.missingData == 1 and result.missingData[1].mapID == 103)
+assert(result.total == 4, "expected four discovered maps")
+assert(result.covered == 2, "expected one stitched and one native map")
+assert(#result.missingData == 1 and result.missingData[1].mapID == 104)
 assert(#result.missingArt == 1 and result.missingArt[1].mapID == 102)
-assert(#result.missingRect == 1 and result.missingRect[1].mapID == 103)
+assert(#result.missingRect == 1 and result.missingRect[1].mapID == 104)
+assert(#result.nativeFallback == 1 and result.nativeFallback[1].mapID == 103)
 assert(AtlasContinuumLabDB.lastAudit == result, "audit result was not persisted")
 
 SlashCmdList.ATLASCONTINUUMAUDIT("missing")

@@ -84,6 +84,15 @@ Important implementation files:
   native. The guide renderer therefore resolves that waypoint independently of
   bridged-pin de-duplication and projects both player and target into the same
   stitched coordinate space.
+- Azeroth `947` has a parent cosmic map. Treating it as a terminal root traps
+  users inside Azeroth; Atlas Continuum now hands the view back to Blizzard at
+  minimum zoom so Outland, Draenor, and other world spaces remain available.
+- Voidstorm `2405` and Harandar `2413` are detached children of Quel'Thalas for
+  UI navigation but do not have usable Azeroth stitch geometry. Their medallions
+  are navigation portals to native Blizzard maps, not stitchable land.
+- Retail retains legacy Eastern Kingdoms zone rectangles beneath the rebuilt
+  Quel'Thalas hierarchy. Explicit continent ownership priority is required so
+  the current map generation paints above the legacy one.
 - The generated data is tied to a client build. New patches, phased maps, new
   continents, or changed art IDs require regeneration and visual validation.
 
@@ -122,9 +131,10 @@ should remain backward-compatible throughout this fork.
 
 ## Current risks
 
-1. **Missing generator toolchain.** The CurseForge runtime archive omits the
-   upstream `tools/` directory. Generated tables can be audited but should not
-   be hand-maintained long-term.
+1. **Missing owned generator toolchain.** The imported runtime archive omits
+   the original `tools/` directory. Generated tables can be audited, but Atlas
+   Continuum needs its own reproducible extractor before it is operationally
+   independent across future Retail patches.
 2. **No in-game test in this workspace.** Static checks cannot detect taint,
    frame-level conflicts, GPU fill-rate issues, or incorrect visual alignment.
 3. **Patch drift.** Interface `120105` and data build `12.1.5.70448` will age.

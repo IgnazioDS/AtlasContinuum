@@ -85,6 +85,26 @@ if ns.MapWorld and ns.MapWorld.minimap then
 	end
 end
 
+local function HasGameMap(mapID, gameMap)
+	for _, id in ipairs(CONT_OF[mapID] or {}) do
+		if id == gameMap then return true end
+	end
+	return false
+end
+
+-- Some Retail continents share one outdoor minimap coordinate system. Select the deepest stitched
+-- continent under this tile/piece so its land mask follows the visible map generation rather than
+-- whichever continent happened to have the lowest numeric map ID.
+local function MaskMapAt(gameMap, u, v)
+	local picked
+	if u and v then
+		for _, mapID in ipairs(S.ChainAt(u, v)) do
+			if HasGameMap(mapID, gameMap) then picked = mapID end
+		end
+	end
+	return picked or CONT_MAP[gameMap]
+end
+
 local function Smooth(x, r)
 	local t = math.max(0, math.min(1, (x - r[1]) / (r[2] - r[1])))
 	return t * t * (3 - 2 * t)
@@ -127,13 +147,14 @@ local TileKey = function(cont, tx, ty) return cont * 4096 + tx * 64 + ty end   -
 local wantedTiles, wantedGap = {}, {}   -- (reused each update)
 
 -- a tile, through its continent's land (S.LandMask): the minimap's sea is left out
-local function Tile(layer, fid, cont)
+local function Tile(layer, fid, cont, u, v)
 	local t = tremove(pool)
 	if not t then
 		t = { layer:CreateTexture(nil, "ARTWORK") }
 		t[1]:SetDesaturation(MINI_DESAT)
 	end
-	local mask = CONT_MAP[cont] and S.LandMask and S.LandMask(layer, CONT_MAP[cont])
+	local maskMap = MaskMapAt(cont, u, v)
+	local mask = maskMap and S.LandMask and S.LandMask(layer, maskMap)
 	if t.mask ~= mask then
 		if t.mask then t[1]:RemoveMaskTexture(t.mask) end
 		if mask then t[1]:AddMaskTexture(mask) end
@@ -171,11 +192,12 @@ local function LODSet(cont, level, keys)
 	return lodSets[k]
 end
 
-local function LODPiece(layer, cont, sub)
+local function LODPiece(layer, cont, sub, u, v)
 	local t = tremove(lodPool) or layer:CreateTexture(nil, "ARTWORK")
 	t:SetDrawLayer("ARTWORK", sub)
 	t:SetDesaturation(MINI_DESAT)
-	local mask = CONT_MAP[cont] and S.LandMask and S.LandMask(layer, CONT_MAP[cont])
+	local maskMap = MaskMapAt(cont, u, v)
+	local mask = maskMap and S.LandMask and S.LandMask(layer, maskMap)
 	if t.omMask ~= mask then
 		if t.omMask then t:RemoveMaskTexture(t.omMask) end
 		if mask then t:AddMaskTexture(mask) end
@@ -197,7 +219,7 @@ local function ShowLOD(layer, cont, level, per, keys, tx0, tx1, ty0, ty1, alpha)
 					local u0, v0 = S.FromYards(cont, (32 - row * per) * TILE, (32 - col * per) * TILE)
 					local u1, v1 = S.FromYards(cont, (32 - (row + 1) * per) * TILE, (32 - (col + 1) * per) * TILE)
 					if u0 and u1 then           -- (none for a piece off the stitched world: Outland's, on 530)
-						t = LODPiece(layer, cont, -level)
+						t = LODPiece(layer, cont, -level, (u0 + u1) / 2, (v0 + v1) / 2)
 						t:SetTexture(LOD .. cont .. "_" .. per .. "_" .. col .. "_" .. row, nil, nil, "LINEAR")
 						lodPieces[key] = t
 						S.PlaceWorld(t, math.min(u0, u1), math.min(v0, v1), math.max(u0, u1), math.max(v0, v1))
@@ -253,7 +275,7 @@ local function UpdateMinimap(layer, conts, u, v, hu, hv, mix)
 							wanted[key] = true
 							local t = tiles[key]
 							if not t then
-								t = Tile(layer, fid, cont)
+								t = Tile(layer, fid, cont, (u0 + u1) / 2, (v0 + v1) / 2)
 								tiles[key] = t
 								t[1]:SetVertexColor(TileTone((u0 + u1) / 2, (v0 + v1) / 2))
 								for _, tex in ipairs(t) do

@@ -65,27 +65,34 @@ function Lab.RunAudit()
 		missingData = {},
 		missingArt = {},
 		missingRect = {},
+		nativeFallback = {},
 	}
 
 	local mapWorld = ns.MapWorld or {}
 	local known = mapWorld.zones or {}
+	local away = ns.ClientMaps and ns.ClientMaps.awayMaps or {}
 	local children = SafeCall(C_Map.GetMapChildrenInfo, WORLD_MAP_ID, Enum.UIMapType.Zone, true) or {}
 
 	for _, info in ipairs(children) do
 		if type(info) == "table" and type(info.mapID) == "number" then
 			result.total = result.total + 1
+			local native = away[info.mapID] == true
 			local listed = known[info.mapID] ~= nil
 			local art = HasArt(info.mapID)
 			local rect = HasUsableRect(info.mapID)
 
-			if not listed then AddIssue(result, "missingData", info, "not listed in Data/Retail/World.lua") end
+			if native then
+				AddIssue(result, "nativeFallback", info, "opens Blizzard's native map")
+			elseif not listed then
+				AddIssue(result, "missingData", info, "not listed in Data/Retail/World.lua")
+			end
 			if not art then AddIssue(result, "missingArt", info, "C_Map.GetMapArtLayers returned no art") end
-			if not rect then AddIssue(result, "missingRect", info, "no usable rectangle on uiMapID 947") end
-			if listed and art and rect then result.covered = result.covered + 1 end
+			if not native and not rect then AddIssue(result, "missingRect", info, "no usable rectangle on uiMapID 947") end
+			if art and (native or (listed and rect)) then result.covered = result.covered + 1 end
 		end
 	end
 
-	for _, bucket in ipairs({ "missingData", "missingArt", "missingRect" }) do
+	for _, bucket in ipairs({ "missingData", "missingArt", "missingRect", "nativeFallback" }) do
 		table.sort(result[bucket], SortMaps)
 	end
 
@@ -99,6 +106,7 @@ local function PrintSummary(result)
 	local missing = #result.missingData
 	local noArt = #result.missingArt
 	local noRect = #result.missingRect
+	local native = #result.nativeFallback
 	ns:Print(
 		"Retail audit: |cffffffff%d/%d|r zone/city maps ready on %s (build %s, interface %s).",
 		result.covered,
@@ -108,10 +116,11 @@ local function PrintSummary(result)
 		tostring(result.interfaceVersion or "unknown")
 	)
 	ns:Print(
-		"Drift: |cffffffff%d|r missing from generated data, |cffffffff%d|r without art, |cffffffff%d|r without a world rectangle.",
+		"Drift: |cffffffff%d|r missing from generated data, |cffffffff%d|r without art, |cffffffff%d|r without a world rectangle; |cffffffff%d|r intentional native transitions.",
 		missing,
 		noArt,
-		noRect
+		noRect,
+		native
 	)
 	if missing + noArt + noRect > 0 then
 		ns:Print("Use |cffffffff/acaudit missing|r for IDs; the complete table is AtlasContinuumLabDB.lastAudit.")

@@ -27,6 +27,9 @@ Continuum preserves native pins and adds only the missing ongoing quests.
 Features:
 
 - Seamless world-to-zone zoom and cross-zone panning.
+- Cosmic-map navigation to Outland, Draenor, and other world spaces.
+- Native detailed-map transitions for detached Retail zones such as Voidstorm
+  and Harandar.
 - Detailed Retail zone, city, cave, and dungeon views.
 - Missing active quest positions across visible zones, with watched, ready,
   failed, disabled, and super-tracked visual states.
@@ -53,6 +56,8 @@ Continuum is not affiliated with or endorsed by Blizzard.
   task/bounty entries handled by Blizzard's other map providers.
 - A quest whose next waypoint has no usable position on the stitched Azeroth
   map cannot be rendered by the bridge.
+- Voidstorm and Harandar deliberately use Blizzard's native map canvas because
+  they do not share Azeroth's stitched world-coordinate space.
 
 ## Screenshots to capture
 
@@ -75,7 +80,7 @@ Continuum is not affiliated with or endorsed by Blizzard.
 - Test login, `/reload`, windowed/full-screen map, zoom, pan, quest progress,
   quest turn-in, super-tracking, city alignment, and saved settings.
 - Test with no other addons, then with common pin providers.
-- Upload `dist/AtlasContinuum-0.4.0-beta.1.zip` as a Beta file.
+- Upload `dist/AtlasContinuum-0.5.0-beta.1.zip` as a Beta file.
 - Publish the source and `NOTICE.md` with the release.
 
 ## Policy notes
@@ -91,6 +96,9 @@ Continuum is not affiliated with or endorsed by Blizzard.
 
 ### New
 
+- Cosmic-map access to Outland, Draenor, and other worlds by zooming out from
+  Azeroth.
+- Native detailed-map transitions for Voidstorm and Harandar.
 - Status-aware cross-zone active quest markers on the seamless map.
 - Objective progress, enhanced quest tooltips, marker sizing, and tracked-only
   mode.
@@ -98,6 +106,9 @@ Continuum is not affiliated with or endorsed by Blizzard.
 
 ### Improved
 
+- Quel'Thalas detail wins cleanly over legacy Eastern Kingdoms zone rectangles,
+  and Silvermoon's detailed city map no longer receives a conflicting minimap
+  band.
 - Focused quests now hide unrelated bridged pins, matching Blizzard's native
   world-map behavior.
 - Ready-for-turn-in markers and glows preserve campaign, legendary, recurring,

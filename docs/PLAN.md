@@ -16,6 +16,25 @@
   and refresh coverage for the full active-quest lifecycle.
 - Added focused-quest behavior, campaign-aware marker treatments, marker
   opacity and progress-label controls, and a live super-tracked quest guide.
+- Restored the parent/cosmic map transition so Outland, Draenor, and other
+  world spaces remain reachable from the seamless Azeroth view.
+- Added explicit native-map transitions for Voidstorm and Harandar.
+- Added Retail overlap priority and shared-minimap masking policies for the
+  rebuilt Quel'Thalas and Silvermoon maps.
+
+## Maintenance independence
+
+- Treat the imported OpenMap release as a frozen historical baseline; do not
+  depend on future upstream changes or releases.
+- Own Retail map policy, diagnostics, tests, packaging, source hosting, issue
+  tracking, versioning, and release notes in this repository.
+- Reconstruct an Atlas Continuum-owned generator toolchain for build-bound map
+  tables before calling the addon patch-independent.
+- Preserve the inherited MIT notices permanently. Zero derivative status would
+  require a separately staffed clean-room rewrite; it cannot be achieved by
+  deleting attribution from the current fork.
+
+See `docs/INDEPENDENCE.md` for the technical and legal completion criteria.
 
 ## Next quest-layer increment
 
@@ -78,6 +97,6 @@ Exit: no known critical interaction bug and a published compatibility table.
 - Publish source, notices, beta changelog, screenshots, checksums, and known
   limitations together.
 
-Exit: `AtlasContinuum-0.4.0-beta.1.zip` is tested from a clean profile and ready
+Exit: `AtlasContinuum-0.5.0-beta.1.zip` is tested from a clean profile and ready
 for a CurseForge Beta upload. Actual upload requires the owner's CurseForge
 account and final project approval.

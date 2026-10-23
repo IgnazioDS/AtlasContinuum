@@ -4,6 +4,13 @@
 local _, ns = ...
 
 ns.MapChangelog = {
+	{ version = "0.5.0-beta.1", date = "2026-10-23", heads = { [1] = "New", [4] = "Fixed", }, items = {
+		"|cff6e2c0aCosmic map navigation|r: zoom out once more from the fitted Azeroth view, or right-click it, to reach Blizzard's world-space map and select Outland, Draenor, and other worlds.",
+		"Voidstorm and Harandar medallions now open their detailed Blizzard maps instead of being treated as invalid Azeroth stitch rectangles.",
+		"New Quel'Thalas zone art now owns its overlap with legacy Eastern Kingdoms map rectangles, preventing old zone tiles from covering the rebuilt continent.",
+		"Silvermoon's detailed city plan no longer receives the conflicting outdoor minimap band, and shared minimap spaces select the correct continent land mask.",
+		"The Retail coverage audit now distinguishes intentional native-map transitions from missing generated stitch data.",
+	} },
 	{ version = "0.4.0-beta.1", date = "2026-10-23", heads = { [1] = "New", [2] = "Improved", }, items = {
 		"|cff6e2c0aSuper-tracked quest guide|r: an optional live gold line runs from your position to the super-tracked quest across the stitched world, including when Blizzard owns the native host-zone pin.",
 		"Focused quests now hide unrelated bridged quest markers, matching the native world map's focused-quest behavior.",

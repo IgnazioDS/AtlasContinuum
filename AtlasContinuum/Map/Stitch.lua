@@ -310,6 +310,21 @@ function S.ChainAt(u, v)
 	return chain
 end
 
+-- A map's owning continent in the UI map tree. Retail can retain several generations of zone
+-- rectangles over the same part of Azeroth; the owner lets the client policy choose which generation
+-- paints above another without hard-coding those relationships into the renderer.
+function S.ContinentOf(mapID)
+	local current = mapID
+	for _ = 1, 8 do
+		local info = C_Map.GetMapInfo(current)
+		if not info then return nil end
+		if info.mapType == Enum.UIMapType.Continent then return current end
+		if not info.parentMapID or info.parentMapID == 0 or info.parentMapID == current then return nil end
+		current = info.parentMapID
+	end
+	return nil
+end
+
 --------------------------------------------------------------------------------
 -- Placing art (in world units; Layout anchors it)
 --------------------------------------------------------------------------------
@@ -1132,12 +1147,7 @@ end
 -- (ns.ClientMaps.detailDensity) a zone's frame, fading in with its continent's zones (ApplyDetail): Live.zones,
 -- and each continent's art's px per world unit over that density (Live.contK: S.SetZoom scales DETAIL_FADE by it)
 function S.ZoneByContinent(mapID, frame)
-	local cont = mapID
-	for _ = 1, 8 do
-		local info = C_Map.GetMapInfo(cont)
-		if not info or info.mapType == Enum.UIMapType.Continent or not info.parentMapID then break end
-		cont = info.parentMapID
-	end
+	local cont = S.ContinentOf(mapID) or mapID
 	Live.zones, Live.contK, Live.contFade = Live.zones or {}, Live.contK or {}, Live.contFade or {}
 	Live.zones[mapID] = { frame = frame, cont = cont, pieces = Live.overlayOf and Live.overlayOf[mapID] }
 	if Live.contK[cont] == nil then
@@ -1314,14 +1324,23 @@ function S.Build(parent, artLevel, range, iconLevel)
 		names[#names + 1] = n
 	end
 
-	-- zones, biggest first so small zones land on top; cities go above everything
+	-- Zones are biggest first so small zones land on top; cities go above everything. A client's
+	-- continent priority resolves places where Retail keeps two generations of valid zone rectangles
+	-- over the same land (notably Eastern Kingdoms and the rebuilt Quel'Thalas).
 	local zones = C_Map.GetMapChildrenInfo(WORLD, Enum.UIMapType.Zone, true) or {}
-	local area = {}
+	local area, owner = {}, {}
 	for _, info in ipairs(zones) do
 		local l, r, t, b = S.Rect(info.mapID)
 		area[info.mapID] = l and (r - l) * (b - t) or 0
+		owner[info.mapID] = S.ContinentOf(info.mapID)
 	end
-	table.sort(zones, function(a, b) return area[a.mapID] > area[b.mapID] end)
+	local priority = ns.ClientMaps and ns.ClientMaps.continentPriority or NONE
+	table.sort(zones, function(a, b)
+		local ap = priority[owner[a.mapID]] or 0
+		local bp = priority[owner[b.mapID]] or 0
+		if ap ~= bp then return ap < bp end
+		return area[a.mapID] > area[b.mapID]
+	end)
 	local level = artLevel + 2
 	for _, info in ipairs(zones) do
 		-- (a zone, or a city: as its client's list has it, else a zone without explored-area pieces is a city)

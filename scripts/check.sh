@@ -96,8 +96,11 @@ if [ -n "$lua_runtime" ]; then
 	if ! "$lua_runtime" "$PROJECT_ROOT/tests/quest_bridge_spec.lua" "$ADDON_ROOT/Map/QuestBridge.lua"; then
 		failures=$((failures + 1))
 	fi
+	if ! "$lua_runtime" "$PROJECT_ROOT/tests/retail_policy_spec.lua" "$ADDON_ROOT/Data/Retail/Client.lua"; then
+		failures=$((failures + 1))
+	fi
 else
-	echo "INFO: lua not installed; skipped Retail audit and quest bridge behavior tests"
+	echo "INFO: lua not installed; skipped Retail audit, map policy and quest bridge behavior tests"
 fi
 
 if [ "$failures" -ne 0 ]; then
@@ -107,4 +110,4 @@ fi
 
 lua_count=$(find "$ADDON_ROOT" -type f -name '*.lua' | wc -l | tr -d ' ')
 asset_count=$(find "$ADDON_ROOT/Media" -type f | wc -l | tr -d ' ')
-echo "OK: Atlas Continuum identity, TOC, Retail selection, audit and quest bridge behavior, $lua_count Lua files, and $asset_count media files validated"
+echo "OK: Atlas Continuum identity, TOC, Retail selection, audit, map policy and quest bridge behavior, $lua_count Lua files, and $asset_count media files validated"

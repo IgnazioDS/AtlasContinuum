@@ -5,8 +5,9 @@ that turns Blizzard's world map into one continuous, detailed canvas. Zoom from
 Azeroth into continents, zones, cities, caves, and dungeons without losing the
 normal quest log, Blizzard controls, or compatible map pins.
 
-Atlas Continuum is an independent fork of the MIT-licensed OpenMap
-`v0.7.1-beta-retail`. Its first Retail-specific feature is a cross-zone active
+Atlas Continuum is an independently maintained fork of the MIT-licensed OpenMap
+`v0.7.1-beta-retail`; the imported release is a frozen historical baseline, not
+a runtime dependency. Its first Retail-specific feature is a cross-zone active
 quest bridge: Blizzard creates quest pins only for the single map hosted under
 the stitched view, so Atlas Continuum adds only the missing ongoing-quest
 positions across the other visible zones. Native Blizzard quest pins remain
@@ -14,13 +15,18 @@ untouched.
 
 ## Status
 
-- Beta version: `0.4.0-beta.1`.
+- Beta version: `0.5.0-beta.1`.
 - Interface target: `120105` (Retail 12.1.5).
 - Retail datasets: build `12.1.5.70448`.
 - Bridged quests distinguish watched, super-tracked, ready, failed, disabled,
   campaign, important, recurring, legendary, calling, and meta states.
 - Focused-quest filtering, configurable marker size/opacity/progress labels, and
   a live player-to-super-tracked-quest guide line are included.
+- Zooming out beyond Azeroth reaches Blizzard's cosmic map for Outland,
+  Draenor, and other world spaces.
+- Voidstorm and Harandar use intentional native-map transitions; overlapping
+  Quel'Thalas/Eastern Kingdoms detail and Silvermoon close-up banding have
+  targeted Retail policies.
 - Quest bridge behavior is covered by a mocked Lua test.
 - TOC entries, Retail data selection, Lua syntax, diagnostics, and packaging are
   validated by `make check`.
@@ -62,7 +68,8 @@ detected Retail client; pass `RETAIL_DIR="/path/to/_retail_"` to select one.
 The installer refuses to replace an unrelated addon or symlink.
 
 See [RESEARCH.md](docs/RESEARCH.md), [PLAN.md](docs/PLAN.md),
-[BRAND.md](docs/BRAND.md), and [CURSEFORGE.md](docs/CURSEFORGE.md).
+[INDEPENDENCE.md](docs/INDEPENDENCE.md), [BRAND.md](docs/BRAND.md), and
+[CURSEFORGE.md](docs/CURSEFORGE.md).
 
 ## Credits and licenses
 

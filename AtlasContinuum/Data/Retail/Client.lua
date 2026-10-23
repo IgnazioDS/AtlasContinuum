@@ -14,7 +14,16 @@ ns.ClientMaps = {
 	-- the cities under the surface, whose minimap shows the surface (Stitch.lua): Undercity, Ironforge
 	underground = { [90] = true, [87] = true },
 	cityFadeOf = {},            -- (no city of retail's comes in sooner than the rest: Stitch.lua's CITY_FADE_OF)
-	cityMiniOf = {},            -- (nor has less of the minimap over it: Close.lua's CITY_MINI_OF)
+	-- Silvermoon's new city plan already carries street-level detail. The outdoor minimap uses the same
+	-- game-map coordinate space as the Eastern Kingdoms and otherwise appears as a hard rectangular band.
+	cityMiniOf = { [2393] = 0 },
+	-- Midnight's detached zone medallions are children of Quel'Thalas in the UI map tree, but live in
+	-- separate world spaces. Clicking them leaves the stitched Azeroth canvas and opens Blizzard's native
+	-- map; backing out returns through the normal cosmic/world navigation.
+	awayMaps = { [2405] = true, [2413] = true }, -- Voidstorm, Harandar
+	-- New Quel'Thalas zone art owns its overlap with legacy Eastern Kingdoms zone rectangles. Higher
+	-- priorities are created later and therefore paint above older overlapping map generations.
+	continentPriority = { [2537] = 10 },
 	-- Retail's world and continent maps are painted whole: their art paints its own sea and every coast. So
 	-- the stitched map is that art as it is (Stitch.lua): no sea of OpenMap's under it (sea = false: the
 	-- world and continent art stay as Blizzard painted them, never muted to it), and the world and continent
