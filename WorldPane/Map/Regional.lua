@@ -126,11 +126,31 @@ end
 
 R.links = {}
 
+-- Blizzard's MapLink pins use right-click to navigate while WorldPane's stitched
+-- canvas uses left-click to descend. Detached portals support both conventions;
+-- middle-click remains reserved for Find Me.
+function R.IsOpenButton(button)
+	return button == "LeftButton" or button == "RightButton"
+end
+
 -- Hit the real UiMapLink rectangle first. The pixel-radius fallback also covers live-only future links
 -- that have a centre but no client policy bounds yet.
 function R.AwayLinkAt(u, v, pxU, pxV, links, reach)
 	if not (u and v) then return end
-	links, reach = links or R.links, reach or 48
+	if links == nil then
+		links = R.links
+		-- Link geometry is cheap and comes from client policy plus C_Map. Rebuild it
+		-- lazily if the first stitched-map build occurred before this provider was
+		-- ready; click handling must not depend on one initialization ordering.
+		if #links == 0 then
+			local policy = ns.ClientMaps
+			if policy and policy.awayMaps then
+				R.links = R.AwayLinks(policy.awayMaps, policy.awayLinks, S.Rect)
+				links = R.links
+			end
+		end
+	end
+	reach = reach or 48
 	for _, link in ipairs(links or {}) do
 		if link.u0 and u >= link.u0 and u <= link.u1 and v >= link.v0 and v <= link.v1 then
 			return link.mapID
@@ -404,8 +424,10 @@ function mod:BuildRegionalLinks()
 			{ texture = "Interface\\Buttons\\WHITE8x8", size = 64, color = { 1, 1, 1, 0 } }, link)
 		pin.Icon:SetAlpha(0)
 		pin.Highlight:SetAlpha(0)
+		pin.openAwayMap = true
 		local mapID, name = link.mapID, link.name
-		pin.OnClick = function()
+		pin.OnClick = function(_, button)
+			if not R.IsOpenButton(button or "LeftButton") then return end
 			if mod.OpenRegionalMap then mod.OpenRegionalMap(mapID) end
 		end
 		pin:SetScript("OnEnter", function(self)

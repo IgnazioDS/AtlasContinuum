@@ -764,15 +764,18 @@ local function OnCanvasClick(_, button)
 	local u, v, pu, pv = mod.CursorWorld()
 	local _, _, zoom = View()
 	local chain = S.ChainAt(u, v)
+	-- These MapLinks are navigation portals, not stitched child rectangles.
+	-- Resolve them before the ordinary left/right branches so WorldPane's
+	-- left-click convention and Blizzard's right-click convention both work.
+	if ns.MapRegions and ns.MapRegions.IsOpenButton(button) then
+		local target = ns.MapRegions.AwayLinkAt(u, v, pu, pv)
+		if not target then
+			local away = ns.ClientMaps and ns.ClientMaps.awayMaps
+			target = ns.MapRegions.DetachedAt(WORLD, u, v, away)
+		end
+		if target then OpenNativeMap(target) return true end
+	end
 	if button == "LeftButton" then
-		local linked = ns.MapRegions and ns.MapRegions.AwayLinkAt(u, v, pu, pv)
-		if linked then OpenNativeMap(linked) return true end
-		-- Detached zones can appear as medallions on Azeroth while their detailed art belongs to another
-		-- world space. Resolve those before the stitched chain: a detached child has no rectangle by
-		-- definition, so it can never be appended to S.ChainAt.
-		local away = ns.ClientMaps and ns.ClientMaps.awayMaps
-		local detached = ns.MapRegions and ns.MapRegions.DetachedAt(WORLD, u, v, away)
-		if detached then OpenNativeMap(detached) return true end
 		for _, id in ipairs(chain) do
 			if id ~= WORLD and Stitchable(id) and FitZoom(id) > zoom * 1.05 then
 				local l, r, t, b = S.Rect(id)
@@ -811,13 +814,15 @@ end
 
 local function OnPinMouseUp(pin, button)
 	local x, y = sc:GetCursorPosition()
-	if button ~= "LeftButton" or not sc:WouldCursorPositionBeClick(button, x, y) then
+	local openAway = pin.openAwayMap and ns.MapRegions and ns.MapRegions.IsOpenButton(button)
+	if (button ~= "LeftButton" and not openAway) or not sc:WouldCursorPositionBeClick(button, x, y) then
 		sc:OnMouseUp(button)
 		return
 	end
-	sc.mouseButtonInfo.LeftButton.down = false
+	local mouseInfo = sc.mouseButtonInfo and sc.mouseButtonInfo[button]
+	if mouseInfo then mouseInfo.down = false end
 	if Dropping(button) then DropAtCursor() return end
-	if pin.OnClick then pin:OnClick() end
+	if pin.OnClick then pin:OnClick(button) end
 end
 
 -- a click on one of Blizzard's map icons goes to its pin handlers, not the canvas's: dropping a

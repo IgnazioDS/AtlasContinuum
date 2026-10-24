@@ -3,6 +3,13 @@
 local _, ns = ...
 
 ns.MapChangelog = {
+	{ version = "0.3.0-beta.2", date = "2026-10-24", heads = {
+		[1] = "Detached portal input",
+	}, items = {
+		"|cff6e2c0aVoidstorm and Harandar|r now honor both WorldPane's left-click navigation and Blizzard's right-click map-link convention across the canvas and WorldPane-owned targets.",
+		"Their configured and live link geometry is rebuilt on demand, preventing an early map initialization from leaving either portal inert.",
+		"Each portal opens Blizzard's native, coordinate-correct detailed map instead of stretching separate world-space art into Azeroth.",
+	} },
 	{ version = "0.3.0-beta.1", date = "2026-10-24", heads = {
 		[1] = "Adaptive map HUD",
 		[5] = "Interface system",

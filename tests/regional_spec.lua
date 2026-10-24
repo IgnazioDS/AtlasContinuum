@@ -45,7 +45,12 @@ C_Map = {
 
 local module = { enabled = true }
 local ns = {
-	MapStitch = { WORLD = 947 },
+	MapStitch = {
+		WORLD = 947,
+		Rect = function(mapID)
+			if mapID == 2537 then return 0.75, 1, 0, 0.5 end
+		end,
+	},
 	ClientMaps = { awayMaps = { [2405] = true, [2413] = true } },
 	GetModule = function(_, name)
 		assert(name == "worldmap")
@@ -55,6 +60,10 @@ local ns = {
 
 assert(loadfile(regionalPath))("WorldPane", ns)
 local regions = assert(ns.MapRegions)
+
+assert(regions.IsOpenButton("LeftButton") and regions.IsOpenButton("RightButton"),
+	"detached portals must support both WorldPane and Blizzard navigation clicks")
+assert(not regions.IsOpenButton("MiddleButton"), "middle-click must remain reserved for Find Me")
 
 local detached = regions.DetachedAt(947, 0.9, 0.25, { [2405] = true, [2413] = true })
 assert(detached == 2405, "nested detached map must be resolved before its missing rectangle is rejected")
@@ -84,6 +93,11 @@ assert(regions.AwayLinkAt(links[1].u0 + 0.001, links[1].v0 + 0.001, nil, nil, li
 	"clicking anywhere in Voidstorm's painted medallion must open Voidstorm")
 assert(regions.AwayLinkAt(links[2].u, links[2].v, 0.001, 0.001, links) == 2413,
 	"the centre hit fallback must open Harandar")
+
+ns.ClientMaps.awayLinks = configuredLinks
+regions.links = {}
+assert(regions.AwayLinkAt(links[1].u, links[1].v, 0.001, 0.001) == 2405,
+	"detached link geometry must recover if initialization occurred before the provider was ready")
 
 local zones = regions.ZoneRects(101)
 assert(#zones == 2, "regional discovery must ignore child maps without a root rectangle")

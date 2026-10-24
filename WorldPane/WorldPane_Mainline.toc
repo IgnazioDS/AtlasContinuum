@@ -6,7 +6,7 @@
 ## AddonCompartmentFunc: WorldPane_OnAddonCompartmentClick
 ## AddonCompartmentFuncOnEnter: WorldPane_OnAddonCompartmentEnter
 ## AddonCompartmentFuncOnLeave: WorldPane_OnAddonCompartmentLeave
-## Version: 0.3.0-beta.1
+## Version: 0.3.0-beta.2
 ## SavedVariables: WorldPaneDB, WorldPaneLabDB
 ## SavedVariablesPerCharacter: WorldPaneCharDB
 ## OptionalDeps: AtlasContinuum, Leatrix_Maps, Mapster, Magnify

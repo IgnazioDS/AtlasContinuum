@@ -10,7 +10,7 @@ API, inter-addon protocol, validation, packaging, and support workflow.
 
 ## Current beta
 
-- Version `0.3.0-beta.1`; Retail interface `120105`.
+- Version `0.3.0-beta.2`; Retail interface `120105`.
 - A responsive map HUD adapts to compact, standard, and wide windows while
   preserving map type, title, hierarchy, and live logarithmic zoom depth.
 - Map changes use a staged entrance, readable hold, and soft exit; optional
@@ -26,8 +26,9 @@ API, inter-addon protocol, validation, packaging, and support workflow.
 - Zooming beyond Azeroth reaches Blizzard's cosmic map for Outland, Draenor,
   and other world spaces; their continent maps gain live zone-detail previews
   and deeper, smoothly blended zoom levels.
-- Voidstorm and Harandar map links open their detailed native maps with either
-  mouse button instead of being swallowed by the stitched canvas.
+- Voidstorm and Harandar map portals open their coordinate-correct native maps
+  with either mouse button, including when their live link geometry arrives
+  after WorldPane's first stitched-map build.
 - Targeted current-Retail policies improve Quel'Thalas overlap and Silvermoon
   close-up rendering.
 - Existing settings from the previous package identity migrate automatically.
