@@ -27,6 +27,7 @@ it for the current Retail build.
 - Supporting tones: ink brown, charcoal, warm parchment, restrained quest gold.
 - Icon: Azeroth—Kalimdor, Eastern Kingdoms, Northrend, Pandaria, and the
   Maelstrom—inside a restrained gold cartographic frame; no legacy initials.
+- CurseForge avatar: 400 x 400 PNG derived from the original square source.
 - UI: preserve Blizzard's map language while using responsive hierarchy,
   restrained staged motion, precise alignment, strong focus states, and
   consistent component feedback.

@@ -36,14 +36,14 @@ API, inter-addon protocol, validation, packaging, and support workflow.
   after WorldPane's first stitched-map build.
 - Targeted current-Retail policies improve Quel'Thalas overlap and Silvermoon
   close-up rendering.
-- Existing settings from the previous package identity migrate automatically.
+- Development installs retain a one-time bridge for settings from the previous
+  package identity; the public release is a clean, single-addon install.
 
 ## Install
 
 Extract the release archive into `_retail_/Interface/AddOns/`. The archive
-contains the `WorldPane` addon and a tiny load-on-demand migration helper. Enable
-**WorldPane**, open the map with `M`, and use `/wpaudit` after major Retail
-patches to check map-data coverage.
+contains one `WorldPane` folder. Enable **WorldPane**, open the map with `M`, and
+use `/wpaudit` after major Retail patches to check map-data coverage.
 
 ## Commands
 
@@ -71,7 +71,8 @@ links both package folders into a detected Retail client; pass
 
 WorldPane is a mixed-license project: the historical MIT foundation remains
 MIT, while original work after the documented boundary is All Rights Reserved.
-WorldPane began from MIT-licensed OpenMap code; the required notice and exact
-boundary are bundled in [NOTICE.md](NOTICE.md) and [LICENSE.md](LICENSE.md).
-Third-party libraries retain their own licenses. Blizzard map art is not
-licensed by the software licenses.
+WorldPane began as a permitted fork of the MIT-licensed
+[OpenMap](https://www.curseforge.com/wow/addons/openmap) `v0.7.1-beta-retail`
+codebase; the required notice and exact boundary are bundled in
+[NOTICE.md](NOTICE.md) and [LICENSE.md](LICENSE.md). Third-party libraries retain
+their own licenses. Blizzard map art is not licensed by the software licenses.

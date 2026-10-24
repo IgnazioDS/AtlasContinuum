@@ -1,8 +1,10 @@
 # WorldPane notices
 
 WorldPane began from the MIT-licensed OpenMap `v0.7.1-beta-retail` codebase and
-the later MIT-licensed Atlas Continuum development line. The full required MIT
-notice is bundled in `LICENSES/Legacy-MIT.txt`.
+the later MIT-licensed Atlas Continuum development line. OpenMap was published
+by jigrobbulus with source credited to jiforever; its project page is
+<https://www.curseforge.com/wow/addons/openmap>. The full required MIT notice is
+bundled in `LICENSES/Legacy-MIT.txt`.
 
 New WorldPane material after commit
 `5e248565f8b75993ecdd15d81a941518f06cc657` is covered by `LICENSE.txt` unless a

@@ -19,13 +19,17 @@ temporary="$DIST/.WorldPane-$version.$$.tmp.zip"
 
 (
 	cd "$PROJECT_ROOT"
-	zip -qr "$temporary" WorldPane AtlasContinuum -x '*/.DS_Store'
+	zip -qr "$temporary" WorldPane -x '*/.DS_Store'
 )
 
 unzip -tq "$temporary" >/dev/null
-if ! unzip -Z1 "$temporary" | grep -Fqx 'WorldPane/WorldPane_Mainline.toc' \
-	|| ! unzip -Z1 "$temporary" | grep -Fqx 'AtlasContinuum/AtlasContinuum_Mainline.toc'; then
-	echo "ERROR: package roots are incomplete" >&2
+if ! unzip -Z1 "$temporary" | grep -Fqx 'WorldPane/WorldPane_Mainline.toc'; then
+	echo "ERROR: WorldPane manifest is missing from the package" >&2
+	rm -f "$temporary"
+	exit 1
+fi
+if unzip -Z1 "$temporary" | awk -F/ '$1 != "WorldPane" { found = 1; exit } END { exit !found }'; then
+	echo "ERROR: CurseForge package must contain only the WorldPane root folder" >&2
 	rm -f "$temporary"
 	exit 1
 fi

@@ -1,9 +1,11 @@
 # WorldPane notices and provenance
 
 WorldPane is an independently maintained Retail map addon. It began from the
-MIT-licensed OpenMap `v0.7.1-beta-retail` codebase and the later MIT-licensed
-Atlas Continuum development line. Their required copyright and permission
-notice is preserved in `WorldPane/LICENSES/Legacy-MIT.txt`.
+MIT-licensed OpenMap `v0.7.1-beta-retail` codebase, published by jigrobbulus
+with source credited to jiforever, and the later MIT-licensed Atlas Continuum
+development line. The upstream project is
+<https://www.curseforge.com/wow/addons/openmap>; its required copyright and
+permission notice is preserved in `WorldPane/LICENSES/Legacy-MIT.txt`.
 
 The license boundary for new WorldPane work is commit
 `5e248565f8b75993ecdd15d81a941518f06cc657`; see `LICENSE.md` and the packaged
