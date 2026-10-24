@@ -3,6 +3,12 @@
 local _, ns = ...
 
 ns.MapChangelog = {
+	{ version = "0.3.0-beta.4", date = "2026-10-24", heads = {
+		[1] = "Azeroth identity",
+	}, items = {
+		"WorldPane's new emblem centres Azeroth itself: Kalimdor, Eastern Kingdoms, Northrend, Pandaria, and the Maelstrom are readable inside a restrained cartographic frame.",
+		"The same artwork now identifies the addon in-game and provides the release-ready 512-pixel CurseForge project image.",
+	} },
 	{ version = "0.3.0-beta.3", date = "2026-10-24", heads = {
 		[1] = "Fluid navigation",
 		[4] = "Calmer cartography",

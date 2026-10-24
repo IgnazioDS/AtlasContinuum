@@ -63,7 +63,7 @@ with or endorsed by Blizzard Entertainment.
   navigation, quest progress, quest turn-in, super-tracking, city alignment,
   native transitions, and saved-settings migration.
 - Test without other addons, then with common pin providers.
-- Upload `dist/WorldPane-0.3.0-beta.3.zip` as a Beta file.
+- Upload `dist/WorldPane-0.3.0-beta.4.zip` as a Beta file.
 - Publish the source, `NOTICE.md`, and license files with the release.
 
 The installable archive must contain both `WorldPane/` and the load-on-demand

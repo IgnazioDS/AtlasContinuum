@@ -10,7 +10,9 @@ API, inter-addon protocol, validation, packaging, and support workflow.
 
 ## Current beta
 
-- Version `0.3.0-beta.3`; Retail interface `120105`.
+- Version `0.3.0-beta.4`; Retail interface `120105`.
+- A new Azeroth emblem anchors the addon identity across the in-game launcher,
+  WorldPane interface, release archive, and CurseForge artwork.
 - A responsive map HUD adapts to compact, standard, and wide windows while
   preserving map type, title, hierarchy, and live logarithmic zoom depth.
 - Wheel input carries through a continuous damped zoom, while click navigation
