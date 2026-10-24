@@ -16,7 +16,7 @@ local WORLD_MAP_ID = 947
 local MAX_CHAT_ROWS = 40
 
 local Lab = {
-	version = "0.1.1",
+	version = "0.2.0",
 	upstreamVersion = "0.7.1-beta-retail",
 }
 _G.WorldPaneLab = Lab

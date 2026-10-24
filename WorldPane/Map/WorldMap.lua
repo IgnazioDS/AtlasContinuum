@@ -975,6 +975,7 @@ local function Setup()
 	map:AddDataProvider(dp)
 
 	if mod.SetupExtras then mod:SetupExtras(map) end
+	if mod.SetupVisual then mod:SetupVisual(map) end
 	if mod.SetupRegional then
 		mod:SetupRegional(map, fl:GetValidFrameLevel("PIN_FRAME_LEVEL_WORLDPANE_STITCH"), ART_RANGE)
 	end
@@ -1065,6 +1066,7 @@ function mod:Refresh()
 	S.ApplyGrade(self.db.colorMatch, self.db.desaturate, self.db.unexplored)
 	ApplyZoom()
 	if self.RefreshExtras then self.RefreshExtras() end
+	if self.RefreshVisual then self.RefreshVisual() end
 	if self.RefreshTownsfolk then self:RefreshTownsfolk() end
 	if self.RefreshDungeonCard then self.RefreshDungeonCard() end
 	if self.RefreshSketch then self.RefreshSketch() end
@@ -1180,6 +1182,7 @@ function mod:Options()
 			desc = "Your own arrow on the world map. Off, you find your way old-school, by the land around you; your party still shows, and so does the minimap." },
 	}
 	if mod.ExtraOptions then mod:ExtraOptions(opts, get, set, off) end
+	if mod.VisualOptions then mod:VisualOptions(opts, get, set, off) end
 	if mod.QuestBridgeOptions then mod:QuestBridgeOptions(opts, get, set, off) end
 	if mod.NavOptions then mod:NavOptions(opts, get, set, off) end
 	if mod.PinOptions then mod:PinOptions(opts, get, set, off) end

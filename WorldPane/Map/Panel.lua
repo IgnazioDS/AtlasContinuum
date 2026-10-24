@@ -31,9 +31,10 @@ local BAR_X, BAR_Y = 14, 14     -- the WorldPane button's corner: the map's bott
 local TOGGLE = 36               -- the WorldPane button (an action button's size)
 local FAV = 30                  -- a favourite's button
 local TILE_H = 60               -- an action's tile in the menu (room for a label on two lines)
-local BRONZE = { 0.66, 0.49, 0.28 }
-local LIT = { 1, 0.82, 0.3 }
-local HEAD = { 0.96, 0.80, 0.50 }
+local theme = ns.Theme
+local BRONZE = theme and theme.semantic.border or { 0.66, 0.49, 0.28 }
+local LIT = theme and theme.semantic.accent or { 1, 0.82, 0.3 }
+local HEAD = theme and theme.semantic.textMuted or { 0.96, 0.80, 0.50 }
 local STAR = "Interface\\TargetingFrame\\UI-RaidTargetingIcon_1"   -- (the raid marker's star: every client has it)
 
 local function HasAtlas(name)
@@ -257,6 +258,12 @@ local function Rows()
 	rows[#rows + 1] = optRow(L["Zone highlight on hover"], "hoverHighlight", Icon("Spell_Holy_MindVision"))
 	rows[#rows + 1] = optRow(L["Zone levels"], "zoneLevels", Icon("Spell_ChargePositive"))
 	rows[#rows + 1] = optRow(L["Coordinates"], "coords", Icon("INV_Misc_Spyglass_03"))
+	rows[#rows + 1] = { L["Visual finish"] }
+	rows[#rows + 1] = optRow(L["Context header"], "visualHeader", Icon("INV_Misc_Map_01"))
+	rows[#rows + 1] = optRow(L["Map transitions"], "visualTransitions", Icon("Spell_Arcane_TeleportDarnassus"))
+	rows[#rows + 1] = optRow(L["Edge atmosphere"], "visualVignette", Icon("Spell_Shadow_Twilight"))
+	rows[#rows + 1] = optRow(L["Parchment grain"], "visualGrain", Icon("INV_Scroll_03"))
+	rows[#rows + 1] = { L["Controls"] }
 	rows[#rows + 1] = optRow(L["Buttons as edge tabs"], "tabRail", Icon("INV_Misc_Book_09"))
 	rows[#rows + 1] = row(L["WorldPane button on the map"], "mapButtons", Icon("INV_Misc_Map_01"), function() return db.mapButtons end,
 		function(v)
@@ -350,6 +357,10 @@ local function SetLit(b, state)
 	if b.boxed then
 		local c = state == "on" and LIT or BRONZE
 		b:SetBackdropBorderColor(c[1], c[2], c[3], 1)
+		if theme then
+			local bg = state == "on" and theme.component.actionTile.backgroundActive or theme.component.actionTile.background
+			b:SetBackdropColor(bg[1], bg[2], bg[3], bg[4])
+		end
 	end
 	b.glow:SetShown(state == "on")
 	b.icon:SetDesaturated(state == "off")
@@ -367,12 +378,14 @@ local function Tile(parent, w, h, iconSize, classic)
 	local slot = b.icon.slot
 	if iconSize then
 		b:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8", edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
-		b:SetBackdropColor(0.08, 0.06, 0.04, 0.92)
+		local face = theme and theme.component.actionTile.background or { 0.08, 0.06, 0.04, 0.92 }
+		b:SetBackdropColor(face[1], face[2], face[3], face[4])
 		slot:SetPoint("TOP", 0, -6)
 		local hl = b:CreateTexture(nil, "HIGHLIGHT")
 		hl:SetPoint("TOPLEFT", 1, -1)
 		hl:SetPoint("BOTTOMRIGHT", -1, 1)
-		hl:SetColorTexture(1, 0.8, 0.45, 0.14)
+		local hover = theme and theme.component.actionTile.hover or { 1, 0.8, 0.45, 1 }
+		hl:SetColorTexture(hover[1], hover[2], hover[3], 0.12)
 	else
 		slot:SetPoint("CENTER")
 		local hl = b:CreateTexture(nil, "HIGHLIGHT")
@@ -391,36 +404,32 @@ local function Tile(parent, w, h, iconSize, classic)
 	return b
 end
 
--- the menu's frame: the map window's own border kit (Blizzard's nine-slice, without the
--- portrait), else the classic dialog's gold border
+-- The floating menu deliberately uses the same quiet obsidian surface and bronze hairline as the
+-- map's contextual chrome. Its content is dense; a restrained frame leaves the actions and labels
+-- to carry hierarchy instead of surrounding them with another heavy Blizzard window.
 local function Dress(f)
-	local util = _G.NineSliceUtil
-	local layout = util and util.GetLayout and util.GetLayout("ButtonFrameTemplateNoPortrait") and "ButtonFrameTemplateNoPortrait"
-	if layout then
-		local ok, nine = pcall(CreateFrame, "Frame", nil, f, "NineSlicePanelTemplate")
-		if ok and nine and pcall(util.ApplyLayoutByName, nine, layout) then
-			nine:SetAllPoints()
-			local bg = f:CreateTexture(nil, "BACKGROUND")
-			bg:SetPoint("TOPLEFT", 6, -21)
-			bg:SetPoint("BOTTOMRIGHT", -2, 3)
-			if bg:SetTexture("Interface\\FrameGeneral\\UI-Background-Rock", "REPEAT", "REPEAT") == false then
-				bg:SetColorTexture(0.1, 0.09, 0.08, 1)
-			end
-			bg:SetHorizTile(true)
-			bg:SetVertTile(true)
-			local shade = f:CreateTexture(nil, "BACKGROUND", nil, 1)
-			shade:SetAllPoints(bg)
-			shade:SetColorTexture(0, 0, 0, 0.45)   -- (the rock darkened, so the small print reads)
-			return 21
-		end
+	if theme then theme.Backdrop(f, theme.component.menu, 0.965)
+	else
+		f:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8", edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
+		f:SetBackdropColor(0.03, 0.025, 0.02, 0.965)
+		f:SetBackdropBorderColor(0.52, 0.39, 0.235, 1)
 	end
-	f:SetBackdrop({
-		bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
-		edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Gold-Border",
-		tile = true, tileSize = 32, edgeSize = 32,
-		insets = { left = 11, right = 12, top = 12, bottom = 11 },
-	})
-	return 0
+	local shadow = f:CreateTexture(nil, "BACKGROUND", nil, -1)
+	shadow:SetPoint("TOPLEFT", -7, 7)
+	shadow:SetPoint("BOTTOMRIGHT", 7, -7)
+	shadow:SetColorTexture(0, 0, 0, 0.45)
+	local header = f:CreateTexture(nil, "BACKGROUND", nil, 1)
+	header:SetPoint("TOPLEFT", 1, -1)
+	header:SetPoint("TOPRIGHT", -1, -1)
+	header:SetHeight(30)
+	local raised = theme and theme.component.menu.backgroundRaised or { 0.07, 0.06, 0.05, 0.95 }
+	header:SetColorTexture(raised[1], raised[2], raised[3], 0.95)
+	local accent = f:CreateTexture(nil, "ARTWORK")
+	accent:SetPoint("TOPLEFT", 1, -30)
+	accent:SetPoint("TOPRIGHT", -1, -30)
+	accent:SetHeight(1)
+	accent:SetColorTexture(LIT[1], LIT[2], LIT[3], 0.72)
+	return 30
 end
 
 -- a thin bronze rule
@@ -1188,6 +1197,8 @@ function mod:SetupPanel(worldMap)
 		Place()
 	end)
 	local title = menu:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+	ns.Look:Font(title, 12, "OUTLINE")
+	title:SetTextColor(LIT[1], LIT[2], LIT[3], 1)
 	-- the close button over everything else in the menu, and a little easier to catch than it looks;
 	-- Escape closes the menu too (the map stays open)
 	local close = CreateFrame("Button", nil, menu, "UIPanelCloseButton")
@@ -1203,8 +1214,8 @@ function mod:SetupPanel(worldMap)
 		end
 	end)
 	if titleH > 0 then
-		-- (the nine-slice's own title bar)
-		title:SetPoint("TOP", 0, -4)
+		-- compact WorldPane title bar
+		title:SetPoint("TOP", 0, -7)
 		close:SetPoint("TOPRIGHT", 1, 0)
 	else
 		local header = menu:CreateTexture(nil, "ARTWORK")

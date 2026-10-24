@@ -13,6 +13,7 @@
 local _, ns = ...
 local S = ns.MapStitch
 local mod = ns:GetModule("worldmap")
+local theme = ns.Theme
 
 local d = mod.defaults
 d.coords = true
@@ -156,18 +157,27 @@ local function Pill(parent, label)
 	local pill = CreateFrame("Frame", nil, parent, "BackdropTemplate")
 	pill:SetHeight(24)
 	pill:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8", edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
-	pill:SetBackdropColor(0, 0, 0, 0.78)
-	pill:SetBackdropBorderColor(0.55, 0.42, 0.25, 0.8)
+	local spec = theme and theme.component.infoPill
+	local bg = spec and spec.background or { 0, 0, 0, 1 }
+	local edge = spec and spec.border or { 0.55, 0.42, 0.25, 1 }
+	pill:SetBackdropColor(bg[1], bg[2], bg[3], 0.86)
+	pill:SetBackdropBorderColor(edge[1], edge[2], edge[3], 0.86)
+	local shadow = pill:CreateTexture(nil, "BACKGROUND", nil, -1)
+	shadow:SetPoint("TOPLEFT", -3, 3)
+	shadow:SetPoint("BOTTOMRIGHT", 3, -3)
+	shadow:SetColorTexture(0, 0, 0, 0.30)
 	local fs = pill:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 	fs:SetPoint("LEFT", 10, 0)
 	ns.Look:Font(fs, 12)
-	fs:SetTextColor(1, 0.82, 0)
+	local labelColor = spec and spec.label or { 1, 0.82, 0, 1 }
+	fs:SetTextColor(labelColor[1], labelColor[2], labelColor[3], 1)
 	fs:SetText(label or "")
 	fs.at = pill:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 	fs.at:SetPoint("RIGHT", -10, 0)
 	fs.at:SetWidth(NUMBERS)
 	fs.at:SetJustifyH("RIGHT")
 	ns.Look:Font(fs.at, 12)
+	if spec and spec.value then fs.at:SetTextColor(spec.value[1], spec.value[2], spec.value[3], 1) end
 	return pill, fs
 end
 

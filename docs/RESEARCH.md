@@ -15,6 +15,20 @@ appear at low zoom; zone and city art become authoritative as the view closes
 in. Overlap policies decide which current-Retail layer wins where old and new
 map rectangles intersect.
 
+## Presentation architecture
+
+The visual layer is separate from navigation and map ownership. Raw palette
+values become semantic roles, then component tokens shared by map chrome,
+menus, tool windows, information pills, and action tiles. The default language
+uses obsidian surfaces, parchment text, bronze structure, and a restrained gold
+accent so map artwork remains the visual focus.
+
+A non-interactive canvas overlay supplies a compact context header, zoom-depth
+feedback, edge atmosphere, subtle grain, and short map-title transitions. Each
+effect can be disabled independently and none of them owns clicks, map state,
+or navigation. This keeps presentation changes reversible and prevents visual
+polish from changing map behavior.
+
 ## Navigation hierarchy
 
 1. Azeroth uses the stitched canvas.

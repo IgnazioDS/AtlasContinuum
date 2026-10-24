@@ -3,6 +3,18 @@
 local _, ns = ...
 
 ns.MapChangelog = {
+	{ version = "0.2.0-beta.1", date = "2026-10-24", heads = {
+		[1] = "Visual system",
+		[4] = "Map context",
+	}, items = {
+		"|cff6e2c0aA unified WorldPane identity|r now carries through map chrome, floating menus, tool windows, coordinate pills, and interactive tiles using a dedicated obsidian, parchment, bronze, and gold token system.",
+		"Restrained depth, hairline borders, clearer type hierarchy, and consistent active and hover states replace the previous mixture of unrelated Blizzard surfaces.",
+		"The shared presentation layer is independent of Blizzard's decorative window art, making it more stable across Retail interface changes.",
+
+		"|cff6e2c0aA live context header|r identifies the current map, its parent hierarchy, and zoom depth without interrupting the canvas.",
+		"Short map-title transitions clarify movement between worlds, continents, and zones; edge atmosphere and subtle parchment grain visually join map art from different eras.",
+		"Context header, transitions, edge atmosphere, and parchment grain can each be disabled from the Look panel.",
+	} },
 	{ version = "0.1.1-beta.2", date = "2026-10-24", heads = {
 		[1] = "Detached links",
 	}, items = {

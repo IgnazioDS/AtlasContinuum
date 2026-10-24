@@ -37,6 +37,8 @@ fi
 
 if ! grep -Fq '## Title: |cffe6b85cWorld|rPane' "$TOC" \
 	|| ! grep -Fq '## SavedVariables: WorldPaneDB, WorldPaneLabDB' "$TOC" \
+	|| ! grep -Fq 'UI\Theme.lua' "$TOC" \
+	|| ! grep -Fq 'Map\Visual.lua' "$TOC" \
 	|| ! grep -Fq 'Map\QuestBridge.lua' "$TOC" \
 	|| ! grep -Fq 'Map\Regional.lua' "$TOC"; then
 	echo "ERROR: WorldPane identity or quest bridge is missing from the TOC" >&2
@@ -110,6 +112,9 @@ if [ -n "$lua_runtime" ]; then
 		failures=$((failures + 1))
 	fi
 	if ! "$lua_runtime" "$PROJECT_ROOT/tests/regional_spec.lua" "$ADDON_ROOT/Map/Regional.lua"; then
+		failures=$((failures + 1))
+	fi
+	if ! "$lua_runtime" "$PROJECT_ROOT/tests/visual_spec.lua" "$ADDON_ROOT/UI/Theme.lua" "$ADDON_ROOT/Map/Visual.lua"; then
 		failures=$((failures + 1))
 	fi
 	if ! "$lua_runtime" "$PROJECT_ROOT/tests/reveal_spec.lua" "$ADDON_ROOT/Data/Retail/Reveal.lua"; then

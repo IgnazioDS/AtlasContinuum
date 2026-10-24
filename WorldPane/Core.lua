@@ -189,8 +189,10 @@ function ns.Desc(text, order)
 end
 
 --------------------------------------------------------------------------------
--- Look: fonts and a plain dark panel (other addons may restyle these: every
--- panel is frame.omBackdrop, every font goes through ns.Look:Font)
+-- Look: fonts and the shared WorldPane surface treatment (other addons may
+-- restyle these: every panel is frame.omBackdrop, every font goes through
+-- ns.Look:Font). Theme.lua loads after Core.lua; these helpers resolve it when
+-- a widget is built, after all addon files have loaded.
 --------------------------------------------------------------------------------
 
 local Look = {}
@@ -219,66 +221,62 @@ function Look:Panel(frame, opts)
 	bd:SetPoint("TOPLEFT", -inset, inset)
 	bd:SetPoint("BOTTOMRIGHT", inset, -inset)
 	bd:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8", edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
-	bd:SetBackdropColor(0.06, 0.06, 0.07, opts.alpha or 0.9)
-	bd:SetBackdropBorderColor(0, 0, 0, 1)
+	local theme = ns.Theme
+	local face = theme and theme.semantic.surface or { 0.03, 0.027, 0.024, 1 }
+	local edge = theme and theme.semantic.borderQuiet or { 0.28, 0.20, 0.12, 1 }
+	bd:SetBackdropColor(face[1], face[2], face[3], opts.alpha or 0.94)
+	bd:SetBackdropBorderColor(edge[1], edge[2], edge[3], 0.95)
+	if opts.shadow ~= false and not bd.omShadow then
+		local shadow = bd:CreateTexture(nil, "BACKGROUND", nil, -1)
+		shadow:SetPoint("TOPLEFT", -5, 5)
+		shadow:SetPoint("BOTTOMRIGHT", 5, -5)
+		shadow:SetColorTexture(0, 0, 0, 0.34)
+		bd.omShadow = shadow
+	end
 	return bd
 end
 
--- a dropdown list in the game's own menus' look (its dark rounded panel, which WoW Forever edges in
--- bronze: Blizzard_Menu's MenuStyle1, the same offsets), else the plain panel with a bronze edge.
+-- A compact dropdown surface using the same materials as the map chrome.
 -- Returns the room to leave inside it: left, top, right, bottom
 function Look:Dropdown(frame)
-	if C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo("common-dropdown-bg") then
-		local bg = frame:CreateTexture(nil, "BACKGROUND")
-		bg:SetAtlas("common-dropdown-bg")
-		bg:SetPoint("TOPLEFT", -10, 3)
-		bg:SetPoint("BOTTOMRIGHT", 10, -3)
-		bg:SetAlpha(0.925)
-		return 8, 8, 8, 15
-	end
 	local bd = Look:Panel(frame, { alpha = 0.97 })
-	bd:SetBackdropBorderColor(0.66, 0.49, 0.28, 1)
-	return 6, 6, 6, 6
+	local accent = ns.Theme and ns.Theme.semantic.border or { 0.52, 0.39, 0.24, 1 }
+	bd:SetBackdropBorderColor(accent[1], accent[2], accent[3], 0.92)
+	return 8, 8, 8, 8
 end
 
--- a window in the game's own frame: the map window's metal border (Blizzard's nine-slice without the
--- portrait, which WoW Forever draws in bronze) over its dark rock, a title in its title bar and its
--- close button; else (a client without that layout) the plain panel with a title and a close button.
+-- A WorldPane window: obsidian surface, restrained bronze edge, raised title
+-- strip and a thin gold rule. Keeping this independent of Blizzard's nine-slice
+-- art gives all WorldPane tools the same visual identity across Retail updates.
 -- Returns the title bar's height (content starts below it), the title and the close button.
 function Look:Window(frame, title, onClose)
-	local util = _G.NineSliceUtil
-	local top = 0
-	local layout = util and util.GetLayout and util.GetLayout("ButtonFrameTemplateNoPortrait") and "ButtonFrameTemplateNoPortrait"
-	local ok, nine = false, nil
-	if layout then ok, nine = pcall(CreateFrame, "Frame", nil, frame, "NineSlicePanelTemplate") end
-	if ok and nine and pcall(util.ApplyLayoutByName, nine, layout) then
-		nine:SetAllPoints()
-		nine:SetFrameLevel(frame:GetFrameLevel())
-		local bg = frame:CreateTexture(nil, "BACKGROUND")
-		bg:SetPoint("TOPLEFT", 6, -21)
-		bg:SetPoint("BOTTOMRIGHT", -2, 3)
-		if bg:SetTexture("Interface\\FrameGeneral\\UI-Background-Rock", "REPEAT", "REPEAT") == false then
-			bg:SetColorTexture(0.1, 0.09, 0.08, 1)
-		end
-		bg:SetHorizTile(true)
-		bg:SetVertTile(true)
-		local shade = frame:CreateTexture(nil, "BACKGROUND", nil, 1)
-		shade:SetAllPoints(bg)
-		shade:SetColorTexture(0, 0, 0, 0.45)       -- (the rock darkened, so the small print reads)
-		top = 21
-	else
-		Look:Panel(frame, { alpha = 0.96 })
-	end
+	local top = 34
+	Look:Panel(frame, { alpha = 0.975 })
+	local theme = ns.Theme
+	local raised = theme and theme.semantic.surfaceRaised or { 0.08, 0.07, 0.06, 1 }
+	local accent = theme and theme.semantic.accent or { 1, 0.79, 0.28, 1 }
+	local header = frame:CreateTexture(nil, "BACKGROUND")
+	header:SetPoint("TOPLEFT", 1, -1)
+	header:SetPoint("TOPRIGHT", -1, -1)
+	header:SetHeight(top - 1)
+	header:SetColorTexture(raised[1], raised[2], raised[3], 0.96)
+	local rule = frame:CreateTexture(nil, "ARTWORK")
+	rule:SetPoint("TOPLEFT", 1, -top)
+	rule:SetPoint("TOPRIGHT", -1, -top)
+	rule:SetHeight(1)
+	rule:SetColorTexture(accent[1], accent[2], accent[3], 0.68)
 	local text = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-	text:SetPoint("TOPLEFT", top > 0 and 30 or 12, top > 0 and -4 or -10)
-	text:SetPoint("TOPRIGHT", -30, top > 0 and -4 or -10)
-	text:SetJustifyH(top > 0 and "CENTER" or "LEFT")
+	Look:Font(text, 12, "OUTLINE")
+	text:SetPoint("TOPLEFT", 34, -9)
+	text:SetPoint("TOPRIGHT", -34, -9)
+	text:SetJustifyH("CENTER")
 	text:SetWordWrap(false)
+	text:SetTextColor(accent[1], accent[2], accent[3], 1)
 	text:SetText(title or "")
 	local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
 	close:SetFrameLevel(frame:GetFrameLevel() + 20)
 	close:SetHitRectInsets(-4, -4, -4, -4)
-	if top > 0 then close:SetPoint("TOPRIGHT", 1, 0) else close:SetPoint("TOPRIGHT", 2, 2) end
+	close:SetPoint("TOPRIGHT", 1, 0)
 	close:SetScript("OnClick", onClose or function() frame:Hide() end)
 	return top, text, close
 end

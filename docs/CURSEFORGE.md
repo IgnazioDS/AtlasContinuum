@@ -19,6 +19,10 @@ normal quest log, controls, and compatible addon pins.
 
 Features:
 
+- Unified WorldPane visual language across map chrome, menus, tool windows,
+  information pills, and action states.
+- Contextual map hierarchy, live zoom feedback, refined transitions, edge
+  atmosphere, and optional parchment grain.
 - Seamless world-to-zone zoom and cross-zone panning.
 - Cosmic navigation plus detailed, smoothly blended zone previews for Outland,
   Draenor, and other world spaces.
@@ -55,7 +59,7 @@ with or endorsed by Blizzard Entertainment.
   navigation, quest progress, quest turn-in, super-tracking, city alignment,
   native transitions, and saved-settings migration.
 - Test without other addons, then with common pin providers.
-- Upload `dist/WorldPane-0.1.1-beta.2.zip` as a Beta file.
+- Upload `dist/WorldPane-0.2.0-beta.1.zip` as a Beta file.
 - Publish the source, `NOTICE.md`, and license files with the release.
 
 The installable archive must contain both `WorldPane/` and the load-on-demand
