@@ -200,9 +200,15 @@ end
 --   glide:  click zoom from one view to another, as one zoom about a fixed point
 --------------------------------------------------------------------------------
 
-local ZOOM_RATE = 14            -- the wheel zoom's approach, per second (in log zoom)
-local GLIDE_TIME = 0.4
+local motion = ns.Theme and ns.Theme.motion or {}
+local ZOOM_FREQUENCY = motion.zoomFrequency or 17
+local GLIDE_MIN, GLIDE_MAX = motion.glideMin or 0.28, motion.glideMax or 0.52
 local anim                      -- the running animation, or nil
+
+local function SmootherStep(value)
+	local t = Clamp(value, 0, 1)
+	return t * t * t * (t * (t * 6 - 15) + 10)
+end
 
 -- the gamepad's cursor on the map (Blizzard's SoftCursor, in gamepad mode), in screen px as
 -- GetCursorPosition: while it's what's in use. That's from when it shows or moves until the
@@ -301,16 +307,26 @@ local function ZoomAtCursor(factor)
 	if factor < 1 and zoom <= 1.001 and OpenParentMap() then return end
 	local sx, sy = CursorOffset()
 	local pu, pv = PerPx(zoom)
-	local target = Clamp((anim and anim.mode == "anchor" and anim.target or zoom) * factor, 1, MaxZoomAt(u + sx * pu, v + sy * pv))
-	anim = { mode = "anchor", u = u + sx * pu, v = v + sy * pv, sx = sx, sy = sy, target = target }
+	local running = anim and anim.mode == "anchor" and anim or nil
+	local target = Clamp((running and running.target or zoom) * factor, 1, MaxZoomAt(u + sx * pu, v + sy * pv))
+	local velocity = running and running.velocity or 0
+	if running and math.log(running.target / zoom) * math.log(target / zoom) < 0 then velocity = 0 end
+	anim = { mode = "anchor", u = u + sx * pu, v = v + sy * pv, sx = sx, sy = sy,
+		target = target, velocity = velocity }
 	userMoved = true
 end
 
 -- glides the view to a world point (normalized) at `zoom`
 local function GlideTo(u, v, zoom)
 	local u0, v0, z0 = View()
+	local z1 = Clamp(zoom, 1, MaxZoomAt(u, v))
+	local pu, pv = PerPx(z0)
+	local pixels = math.sqrt(((u - u0) / pu) ^ 2 + ((v - v0) / pv) ^ 2)
+	local pan = Clamp(pixels / math.max(sc:GetWidth(), sc:GetHeight(), 1), 0, 1)
+	local depth = Clamp(math.abs(math.log(z1 / z0)) / math.log(16), 0, 1)
+	local duration = GLIDE_MIN + (GLIDE_MAX - GLIDE_MIN) * Clamp(depth * 0.72 + pan * 0.28, 0, 1)
 	anim = { mode = "glide", u0 = u0, v0 = v0, z0 = z0, u1 = u, v1 = v,
-		z1 = Clamp(zoom, 1, MaxZoomAt(u, v)), t = 0 }
+		z1 = z1, t = 0, duration = duration }
 	userMoved = true
 end
 
@@ -342,9 +358,18 @@ local function Animate(_, elapsed)
 	local a = anim
 	if a.mode == "anchor" then
 		local _, _, z = View()
-		local zoom = math.exp(math.log(z) + (math.log(a.target) - math.log(z)) * (1 - math.exp(-elapsed * ZOOM_RATE)))
-		local done = math.abs(math.log(a.target / zoom)) < 0.003
-		if done then zoom = a.target end
+		local logZoom, velocity
+		if ns.Theme and ns.Theme.CriticalDamped then
+			logZoom, velocity = ns.Theme.CriticalDamped(math.log(z), a.velocity or 0,
+				math.log(a.target), ZOOM_FREQUENCY, elapsed)
+		else
+			local decay = 1 - math.exp(-elapsed * ZOOM_FREQUENCY)
+			logZoom, velocity = math.log(z) + (math.log(a.target) - math.log(z)) * decay, 0
+		end
+		a.velocity = velocity
+		local zoom = math.exp(logZoom)
+		local done = math.abs(math.log(a.target / zoom)) < 0.0015 and math.abs(velocity) < 0.015
+		if done then zoom, a.velocity = a.target, 0 end
 		local down = sc.mouseButtonInfo.LeftButton.down
 		if down and not a.down then
 			-- grabbed mid-zoom: what's under the cursor now is what the cursor carries
@@ -360,8 +385,8 @@ local function Animate(_, elapsed)
 		ShowWorld(a.u - a.sx * pu, a.v - a.sy * pv, zoom)
 		if done then anim = nil end
 	else
-		a.t = math.min(1, a.t + elapsed / GLIDE_TIME)
-		local e = a.t * a.t * (3 - 2 * a.t)
+		a.t = math.min(1, a.t + elapsed / a.duration)
+		local e = SmootherStep(a.t)
 		local zoom = math.exp(math.log(a.z0) + (math.log(a.z1) - math.log(a.z0)) * e)
 		-- the centre moves with 1/zoom, which is what zooming about one fixed point looks like
 		local w = math.abs(a.z1 - a.z0) < 1e-6 and e or (1 / a.z0 - 1 / zoom) / (1 / a.z0 - 1 / a.z1)

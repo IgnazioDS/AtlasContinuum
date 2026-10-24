@@ -55,8 +55,10 @@ S.WORLD = WORLD
 
 local CONT_FADE = { 1.3, 2.2 }  -- zoom where each layer starts / finishes fading in
 local CONT_IN, WORLD_OUT = { 1.3, 1.7 }, { 1.7, 2.2 }   -- (the continents come in fully, then the world art's land under them goes)
-local LABELS_OUT = { 3, 4 }     -- the continents' names go as the zones (with their own names) come in
-local SEA_LABELS_OUT = { 3.5, 5 } -- ... and the seas' a little after (nothing comes in over them)
+local LABELS_OUT = ns.ClientMaps and ns.ClientMaps.labelFade or { 3, 4 }
+                                -- the continents' names go as the zones (with their own names) come in
+local SEA_LABELS_OUT = ns.ClientMaps and ns.ClientMaps.seaLabelFade or { 3.5, 5 }
+                                -- ... and the seas' a little after (nothing comes in over them)
 local WORLD_SEA_OUT = { 4, 7 }  -- the world art's sea (the whirlpool, the ship ...) stays the ocean until well in (its
                                 --  lettering is hand-cleaned: tools/map-art); the sea texture takes over after
 local WORLD_COAST_OUT = { 3, 5 } -- ... but off the coasts, where its hatching would grow huge, much sooner
@@ -1616,7 +1618,8 @@ local NAME_TRACK = 0.1          -- the least letter spacing, in cap heights (a l
 local NAME_SPACE = 0.4          -- a word space, in cap heights (a name that doesn't fit the art's lines)
 local HALO = { { 0.07, 1 }, { 0.15, 0.45 } }   -- copies behind the ink: { ring radius (cap heights), strength }
 local HALO_TAPS = 8
-local INK_ALPHA = 0.9           -- (the art's ink lets a little of the paper through)
+local INK_ALPHA = ns.ClientMaps and ns.ClientMaps.labelOpacity or 0.9
+                                -- (the art's ink lets a little of the paper through)
 
 -- the client's name for a label (localized), else its own
 local function NameOf(label)

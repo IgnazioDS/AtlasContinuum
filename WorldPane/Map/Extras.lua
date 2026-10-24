@@ -18,6 +18,7 @@ local theme = ns.Theme
 local d = mod.defaults
 d.coords = true
 d.zoneLevels = true
+d.zoneLabelMode = "dwell"       -- "dwell": reveal after the pointer rests; "instant" or "off"
 d.moveFade = 0                  -- how much the map fades while you move (0 to 0.9)
 d.mapFpsCap = 0                 -- the frame rate at most while the map shows (the game's maxFPS, held then; 0: off)
 
@@ -287,8 +288,25 @@ end
 -- replaces AreaLabelFrameMixin's OnUpdate: the place under the cursor, with its levels. The stitched
 -- map is on the zone you're looking at, so that zone is the map's own: where the game names no
 -- area in it, its own name (Blizzard's label showed none there: its title went missing, #25)
-local function AreaLabelOnUpdate(self)
+local labelElapsed, labelCandidate, labelSince, labelX, labelY, labelVisible = 0, nil, 0, nil, nil, false
+local LABEL_TICK = 0.04
+local LABEL_MOVE = 0.006
+
+local function ResetAreaLabel(name, x, y, now)
+	labelCandidate, labelSince, labelX, labelY, labelVisible = name, now, x, y, false
+end
+
+local function AreaLabelOnUpdate(self, elapsed)
+	labelElapsed = labelElapsed + (elapsed or 0)
+	if labelElapsed < LABEL_TICK then return end
+	labelElapsed = 0
 	self:ClearLabel(MAP_AREA_LABEL_TYPE.AREA_NAME)
+	local mode = mod.db.zoneLabelMode or "dwell"
+	if mode == "off" then
+		ResetAreaLabel(nil, nil, nil, GetTime())
+		self:EvaluateLabels()
+		return
+	end
 	local m = self.dataProvider:GetMap()
 	if m:IsCanvasMouseFocus() or mod.PadCursor() then
 		local mapID = m:GetMapID()
@@ -304,7 +322,17 @@ local function AreaLabelOnUpdate(self)
 				if name then name = name .. LevelText(id) end
 			end
 		end
-		if name then self:SetLabel(MAP_AREA_LABEL_TYPE.AREA_NAME, name) end
+		local now = GetTime()
+		local moved = labelX and labelY and x and y
+			and (math.abs(x - labelX) > LABEL_MOVE or math.abs(y - labelY) > LABEL_MOVE)
+		if name ~= labelCandidate or (not labelVisible and moved) then ResetAreaLabel(name, x, y, now) end
+		local dwell = theme and theme.motion and theme.motion.locationDwell or 0.34
+		if name and (mode == "instant" or labelVisible or now - labelSince >= dwell) then
+			labelVisible = true
+			self:SetLabel(MAP_AREA_LABEL_TYPE.AREA_NAME, name)
+		end
+	else
+		ResetAreaLabel(nil, nil, nil, GetTime())
 	end
 	self:EvaluateLabels()
 end
@@ -517,7 +545,11 @@ function mod:ExtraOptions(opts, get, set, off)
 	opts.coords = { type = "toggle", name = "Coordinates", order = 41, get = get, set = setApply, disabled = off,
 		desc = "A bar along the map's foot: your position, and the zone and position under the cursor." }
 	opts.zoneLevels = { type = "toggle", name = "Zone levels", order = 42, get = get, set = setApply, disabled = off,
-		desc = "Hovering a zone shows its level range, coloured for your level." }
+		desc = "When a location name is visible, add its level range coloured for your level." }
+	opts.zoneLabelMode = { type = "select", name = "Location names", order = 42.2, get = get, set = setApply, disabled = off,
+		values = { dwell = "After the pointer rests", instant = "Immediately", off = "Hidden" },
+		sorting = { "dwell", "instant", "off" },
+		desc = "Show the location under the pointer only after a short pause, immediately, or not at all. The pause keeps names from flashing while you inspect the map." }
 	opts.mapFpsCap = { type = "range", name = "Map frame rate cap", order = 44.5, min = 0, max = 144, step = 6,
 		get = get, set = setApply, disabled = off,
 		desc = "The frame rate at most while the map is open (0: off). A big map draws many layers over the whole screen every frame; 60 halves the graphics card's work at 120 fps, for a smooth enough map. The game's own frame rate setting comes back as the map closes." }

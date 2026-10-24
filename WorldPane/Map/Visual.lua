@@ -91,6 +91,17 @@ function Visual.ZoomProgress(zoom)
 	return Clamp(math.log(zoom) / math.log(64), 0, 1)
 end
 
+-- The stitched canvas quietly changes its host map as the view crosses zones.
+-- That is an implementation detail, not a new destination: the persistent
+-- header may update, but a large location announcement would interrupt normal
+-- browsing. Reserve announcements for explicit native hierarchy changes.
+function Visual.ShouldAnnounce(previous, current, stitched)
+	if not previous or not current or previous.mapID == current.mapID then return false end
+	if stitched then return false end
+	local continent = Enum and Enum.UIMapType and Enum.UIMapType.Continent or 2
+	return (current.mapType or 99) <= continent or (previous.mapType or 99) <= continent
+end
+
 function Visual.HeaderLayout(canvasWidth)
 	local width = math.max(360, tonumber(canvasWidth) or 900)
 	if width < 680 then
@@ -134,7 +145,7 @@ local chrome, header, atmosphere, grain, transition
 local headerIcon, brandText, titleText, pathText, zoomFrame, zoomText, zoomTrack, zoomFill
 local transitionCard, transitionKind, transitionTitle, transitionPath, transitionRule
 local currentLayout, layoutKey, zoomTrackWidth = nil, nil, 52
-local transitionElapsed, lastMapID, updateElapsed = 0, nil, 0
+local transitionElapsed, lastMapInfo, updateElapsed = 0, nil, 0
 
 local function Color(texture, color, alpha)
 	texture:SetColorTexture(color[1], color[2], color[3], alpha or color[4] or 1)
@@ -223,7 +234,7 @@ end
 
 local function LayoutTransition()
 	if not (transitionCard and sc) then return end
-	transitionCard:SetWidth(math.min(420, math.max(300, sc:GetWidth() - 72)))
+	transitionCard:SetWidth(math.min(360, math.max(260, sc:GetWidth() - 96)))
 end
 
 local function UpdateHeader()
@@ -251,14 +262,17 @@ local function StopTransition()
 end
 
 local function PlayTransition(mapID)
-	if not (mod.db.visualTransitions and mapID and mapID ~= lastMapID) then
-		lastMapID = mapID
+	local info = mapID and C_Map.GetMapInfo(mapID)
+	local announce = mod.db.visualTransitions and Visual.ShouldAnnounce(lastMapInfo, info,
+		mod.IsStitched and mod.IsStitched())
+	if not announce then
+		lastMapInfo = info
+		StopTransition()
 		return
 	end
-	lastMapID = mapID
+	lastMapInfo = info
 	local title, _, chain = Visual.Breadcrumb(mapID)
-	local info = chain[#chain]
-	transitionKind:SetText(Visual.MapKind(info))
+	transitionKind:SetText(Visual.MapKind(chain[#chain]))
 	transitionTitle:SetText(title)
 	transitionPath:SetText(Visual.CompactPath(chain, 3))
 	transitionElapsed = 0
@@ -391,31 +405,31 @@ local function BuildTransition(level)
 	transition:EnableMouse(false)
 	local veil = transition:CreateTexture(nil, "BACKGROUND")
 	veil:SetAllPoints()
-	Color(veil, Theme.semantic.shadow, 0.22)
+	Color(veil, Theme.semantic.shadow, 0.055)
 	transitionCard = CreateFrame("Frame", nil, transition, "BackdropTemplate")
-	transitionCard:SetHeight(92)
-	transitionCard:SetPoint("CENTER")
-	Theme.Backdrop(transitionCard, Theme.component.transitionCard, 0.90)
+	transitionCard:SetHeight(72)
+	transitionCard:SetPoint("TOP", transition, "TOP", 0, -76)
+	Theme.Backdrop(transitionCard, Theme.component.transitionCard, 0.84)
 	local shadow = transitionCard:CreateTexture(nil, "BACKGROUND", nil, -1)
 	shadow:SetPoint("TOPLEFT", -8, 8)
 	shadow:SetPoint("BOTTOMRIGHT", 8, -8)
-	Color(shadow, Theme.semantic.shadow, 0.46)
+	Color(shadow, Theme.semantic.shadow, 0.30)
 	transitionRule = transitionCard:CreateTexture(nil, "ARTWORK")
-	transitionRule:SetPoint("TOP", 0, -14)
-	transitionRule:SetSize(82, 1)
-	Color(transitionRule, Theme.semantic.accentBright, 0.78)
+	transitionRule:SetPoint("TOP", 0, -10)
+	transitionRule:SetSize(68, 1)
+	Color(transitionRule, Theme.semantic.accentBright, 0.58)
 	transitionKind = transitionCard:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 	ns.Look:Font(transitionKind, 9, "OUTLINE")
 	Theme.SetColor(transitionKind, "SetTextColor", Theme.semantic.accent)
-	transitionKind:SetPoint("TOP", 0, -20)
+	transitionKind:SetPoint("TOP", 0, -15)
 	transitionTitle = transitionCard:CreateFontString(nil, "OVERLAY", "GameFontNormalHuge")
-	ns.Look:Font(transitionTitle, 23, "OUTLINE")
+	ns.Look:Font(transitionTitle, 19, "OUTLINE")
 	Theme.SetColor(transitionTitle, "SetTextColor", Theme.semantic.text)
-	transitionTitle:SetPoint("CENTER", 0, 1)
+	transitionTitle:SetPoint("CENTER", 0, -1)
 	transitionPath = transitionCard:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
 	ns.Look:Font(transitionPath, 9, "OUTLINE")
 	Theme.SetColor(transitionPath, "SetTextColor", Theme.semantic.textMuted)
-	transitionPath:SetPoint("TOP", transitionTitle, "BOTTOM", 0, -7)
+	transitionPath:SetPoint("TOP", transitionTitle, "BOTTOM", 0, -5)
 	LayoutTransition()
 	transition:Hide()
 end
@@ -438,7 +452,7 @@ function mod:SetupVisual(worldMap)
 		Apply()
 		PlayTransition(map:GetMapID())
 	end
-	provider.OnHide = function() lastMapID = nil StopTransition() end
+	provider.OnHide = function() lastMapInfo = nil StopTransition() end
 	map:AddDataProvider(provider)
 	sc:HookScript("OnSizeChanged", function()
 		LayoutHeader(true)
@@ -451,10 +465,11 @@ function mod:SetupVisual(worldMap)
 		if updateElapsed >= 0.10 then updateElapsed = 0 UpdateHeader() end
 		if transitionElapsed then
 			transitionElapsed = transitionElapsed + elapsed
-			local alpha, scale, done, progress = Visual.TransitionState(transitionElapsed, 0.72)
+			local duration = Theme.motion and Theme.motion.locationTransition or 0.58
+			local alpha, scale, done, progress = Visual.TransitionState(transitionElapsed, duration)
 			transition:SetAlpha(alpha)
 			transitionCard:SetScale(scale)
-			transitionRule:SetWidth(82 + 92 * math.min(1, progress * 2.5))
+			transitionRule:SetWidth(68 + 64 * math.min(1, progress * 2.5))
 			if done then StopTransition() end
 		end
 	end)

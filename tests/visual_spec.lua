@@ -32,6 +32,14 @@ assert(theme.semantic.accent == theme.primitive.gold400,
 	"the interaction accent must resolve through a primitive token")
 assert(theme.component.navTab.backgroundSelected == theme.semantic.surfaceSelected,
 	"selected navigation state must resolve through a semantic token")
+local spring, velocity = theme.CriticalDamped(0, 0, 1, theme.motion.zoomFrequency, 1 / 60)
+assert(spring > 0 and spring < 1 and velocity > 0,
+	"the zoom spring must begin smoothly without overshooting its target")
+for _ = 1, 120 do
+	spring, velocity = theme.CriticalDamped(spring, velocity, 1, theme.motion.zoomFrequency, 1 / 60)
+end
+assert(math.abs(1 - spring) < 0.0001 and math.abs(velocity) < 0.001,
+	"the zoom spring must settle precisely at its target")
 
 local visual = assert(ns.MapVisual)
 local title, path, chain = visual.Breadcrumb(2405)
@@ -54,6 +62,12 @@ assert(wide.mode == "wide" and wide.width <= 800,
 assert(visual.ZoomProgress(1) == 0, "the fitted map must begin the zoom meter")
 assert(math.abs(visual.ZoomProgress(8) - 0.5) < 0.00001, "8x must be the midpoint of a 1x-64x logarithmic meter")
 assert(visual.ZoomProgress(128) == 1, "the zoom meter must clamp beyond its visual range")
+assert(not visual.ShouldAnnounce(nil, maps[947], false),
+	"opening the map must not immediately obscure it with a redundant title")
+assert(not visual.ShouldAnnounce(maps[13], maps[2537], true),
+	"stitched host-map switches must remain quiet while browsing")
+assert(visual.ShouldAnnounce(maps[947], maps[13], false),
+	"an explicit native hierarchy change may retain a restrained location announcement")
 assert(visual.TransitionAlpha(0, 0.5) == 0, "a transition must enter without an abrupt flash")
 local holdAlpha, holdScale = visual.TransitionState(0.2, 0.5)
 assert(holdAlpha == 1 and holdScale == 1, "a transition must hold at a readable resting state")

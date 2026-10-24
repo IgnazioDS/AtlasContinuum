@@ -54,7 +54,15 @@ ns.ClientMaps = {
 	-- not come in yet isn't drawn (or loaded) at all. Over a wider span than WoW Forever's: retail's zone
 	-- maps are drawn in many hands, and a slow crossfade hides where one style gives way to the next
 	detailDensity = 2.5,
-	detailFade = { 3, 5.5 },
+	-- Retail's latest continent and zone artwork differs more strongly in colour,
+	-- line weight, and label density than older maps. A wider handover avoids a
+	-- visible layer step around the current expansion's borders.
+	detailFade = { 2.8, 6.2 },
+	-- Large cartographic names remain orientation aids at world scale, but yield
+	-- sooner and more quietly as detailed zone lettering becomes readable.
+	labelFade = { 2.6, 3.8 },
+	seaLabelFade = { 3.2, 4.8 },
+	labelOpacity = 0.74,
 	-- (only the art near the view is drawn: within this much of the view's size round it, less than WoW
 	-- Forever's 0.35; retail's newer zones are 150 tiles each)
 	cullMargin = 0.2,

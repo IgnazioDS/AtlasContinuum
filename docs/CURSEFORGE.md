@@ -21,8 +21,10 @@ Features:
 
 - Responsive map HUD for compact, standard, and wide windows, with map type,
   hierarchy, and logarithmic zoom feedback.
-- Staged map transitions, zoom-reactive edge atmosphere, precise corner marks,
-  and optional parchment grain.
+- Continuous damped wheel zoom, distance-aware click glides, restrained major
+  map transitions, and optional parchment atmosphere.
+- Calm location labeling: stitched host-map changes stay quiet and hover names
+  wait for the pointer to rest, with immediate and hidden modes available.
 - Unified WorldPane component language across map chrome, navigation tabs,
   search, settings, tool windows, coordinate pills, and action states.
 - Seamless world-to-zone zoom and cross-zone panning.
@@ -61,7 +63,7 @@ with or endorsed by Blizzard Entertainment.
   navigation, quest progress, quest turn-in, super-tracking, city alignment,
   native transitions, and saved-settings migration.
 - Test without other addons, then with common pin providers.
-- Upload `dist/WorldPane-0.3.0-beta.2.zip` as a Beta file.
+- Upload `dist/WorldPane-0.3.0-beta.3.zip` as a Beta file.
 - Publish the source, `NOTICE.md`, and license files with the release.
 
 The installable archive must contain both `WorldPane/` and the load-on-demand

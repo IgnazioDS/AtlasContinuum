@@ -10,12 +10,15 @@ API, inter-addon protocol, validation, packaging, and support workflow.
 
 ## Current beta
 
-- Version `0.3.0-beta.2`; Retail interface `120105`.
+- Version `0.3.0-beta.3`; Retail interface `120105`.
 - A responsive map HUD adapts to compact, standard, and wide windows while
   preserving map type, title, hierarchy, and live logarithmic zoom depth.
-- Map changes use a staged entrance, readable hold, and soft exit; optional
-  zoom-reactive edge atmosphere and parchment grain unify map art from
-  different World of Warcraft eras.
+- Wheel input carries through a continuous damped zoom, while click navigation
+  adapts its travel time to distance and depth for smoother movement.
+- Major map changes use a restrained location announcement; routine stitched
+  zone tracking stays quiet, and hover names wait until the pointer rests.
+- Optional zoom-reactive edge atmosphere and parchment grain unify map art
+  from different World of Warcraft eras.
 - A token-driven obsidian, parchment, bronze, and gold component system covers
   map chrome, menus, tabs, search, coordinate pills, settings, and interaction
   states with consistent focus, hover, and selection feedback.

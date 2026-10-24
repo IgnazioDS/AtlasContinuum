@@ -3,6 +3,18 @@
 local _, ns = ...
 
 ns.MapChangelog = {
+	{ version = "0.3.0-beta.3", date = "2026-10-24", heads = {
+		[1] = "Fluid navigation",
+		[4] = "Calmer cartography",
+	}, items = {
+		"Wheel notches now feed one continuous critically damped zoom, preserving motion instead of restarting an ease-out after every input.",
+		"Click navigation adapts its glide duration to travel distance and map depth, with a softer start and landing.",
+		"Retail's mixed-era continent and zone artwork now crosses over across a wider range, including current-expansion regions and detached native maps.",
+
+		"Routine stitched-zone tracking no longer interrupts browsing with a large location title; explicit native hierarchy changes use a smaller, quieter announcement near the map edge.",
+		"Hover location names now appear after the pointer rests. Immediate and hidden modes are available in WorldPane's On the map settings.",
+		"Large cartographic names use quieter ink and yield earlier as detailed zone lettering becomes readable.",
+	} },
 	{ version = "0.3.0-beta.2", date = "2026-10-24", heads = {
 		[1] = "Detached portal input",
 	}, items = {

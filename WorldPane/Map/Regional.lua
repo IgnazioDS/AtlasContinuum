@@ -22,7 +22,7 @@ local MAX_ZONES = 32
 local MAX_TEXTURES = 2048
 local ZOOM_STEP = 1.25
 local MAX_REGIONAL_ZOOM = 6
-local FADE_FROM, FADE_TO = 1.1, 2.6
+local FADE_FROM, FADE_TO = 1.05, 3.15
 local FEATHER = "Interface\\AddOns\\" .. ADDON .. "\\Media\\Textures\\Retail\\MapFeatherRound"
 
 local function SafeCall(fn, ...)

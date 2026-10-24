@@ -92,10 +92,35 @@ local component = {
 }
 
 local spacing = { hairline = 1, xs = 4, sm = 8, md = 12, lg = 16, xl = 24 }
-local motion = { fast = 0.12, enter = 0.18, hold = 0.20, exit = 0.34 }
+local motion = {
+	fast = 0.12,
+	enter = 0.16,
+	hold = 0.14,
+	exit = 0.26,
+	zoomFrequency = 17,
+	glideMin = 0.28,
+	glideMax = 0.52,
+	locationDwell = 0.34,
+	locationTransition = 0.58,
+}
 
 local Theme = { primitive = primitive, semantic = semantic, component = component, spacing = spacing, motion = motion }
 ns.Theme = Theme
+
+-- An exact critically damped spring step. Zoom uses this in logarithmic space,
+-- so repeated wheel notches add to one continuous movement without overshoot or
+-- the velocity reset that makes conventional ease-out animation feel sticky.
+function Theme.CriticalDamped(value, velocity, target, frequency, elapsed)
+	value = tonumber(value) or 0
+	velocity = tonumber(velocity) or 0
+	target = tonumber(target) or value
+	frequency = math.max(0.001, tonumber(frequency) or motion.zoomFrequency)
+	elapsed = math.max(0, tonumber(elapsed) or 0)
+	local delta = value - target
+	local decay = math.exp(-frequency * elapsed)
+	local impulse = (velocity + frequency * delta) * elapsed
+	return target + (delta + impulse) * decay, (velocity - frequency * impulse) * decay
+end
 
 function Theme.SetColor(target, method, color, alpha)
 	if not (target and target[method] and color) then return end
