@@ -10,7 +10,7 @@ API, inter-addon protocol, validation, packaging, and support workflow.
 
 ## Current beta
 
-- Version `0.2.0-beta.1`; Retail interface `120105`.
+- Version `0.2.0-beta.2`; Retail interface `120105`.
 - A cohesive obsidian, parchment, bronze, and gold visual system now covers the
   map chrome, menus, tool windows, information pills, and action states.
 - A contextual map header shows the current hierarchy and live zoom depth;

@@ -3,6 +3,12 @@
 local _, ns = ...
 
 ns.MapChangelog = {
+	{ version = "0.2.0-beta.2", date = "2026-10-24", heads = {
+		[1] = "Visual startup",
+	}, items = {
+		"The new context header, transitions, edge atmosphere, and parchment grain now complete Retail initialization instead of stopping on an invalid texture blend mode.",
+		"The presentation layer is isolated from core map startup, so a future client-specific visual error cannot disable stitching, quests, or navigation.",
+	} },
 	{ version = "0.2.0-beta.1", date = "2026-10-24", heads = {
 		[1] = "Visual system",
 		[4] = "Map context",

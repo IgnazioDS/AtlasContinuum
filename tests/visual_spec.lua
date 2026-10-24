@@ -50,3 +50,57 @@ assert(module.defaults.visualHeader and module.defaults.visualVignette
 
 print("OK: visual tokens, hierarchy, zoom meter and transition easing")
 
+-- Exercise the actual visual setup against a small Retail UI model. The mock
+-- intentionally validates blend modes: WoW's texture API accepts BLEND/ADD/MOD
+-- style modes, while OVERLAY is a draw layer and aborts addon initialization.
+local function Widget(kind)
+	local widget = { kind = kind, shown = true, width = 0 }
+	function widget:CreateTexture()
+		return Widget("texture")
+	end
+	function widget:CreateFontString()
+		return Widget("font")
+	end
+	function widget:SetBlendMode(mode)
+		assert(mode == "BLEND" or mode == "ADD" or mode == "MOD" or mode == "DISABLE" or mode == "ALPHAKEY",
+			"invalid Retail texture blend mode: " .. tostring(mode))
+	end
+	function widget:SetScript(script, callback)
+		self.scripts = self.scripts or {}
+		self.scripts[script] = callback
+	end
+	function widget:SetShown(shown) self.shown = shown end
+	function widget:Show() self.shown = true end
+	function widget:Hide() self.shown = false end
+	function widget:SetWidth(width) self.width = width end
+	setmetatable(widget, { __index = function(_, key)
+		if key:match("^Set") or key:match("^Clear") or key:match("^Enable") then return function() end end
+	end })
+	return widget
+end
+
+local scroll = Widget("scroll")
+scroll.baseScale = 1
+function scroll:GetFrameLevel() return 20 end
+function scroll:GetCanvasScale() return 2 end
+
+local worldMap = Widget("map")
+function worldMap:GetMapID() return 2405 end
+function worldMap:AddDataProvider(provider) self.provider = provider end
+
+CreateColor = function(r, g, b, a) return { r = r, g = g, b = b, a = a } end
+CreateFrame = function(kind, name, parent) return Widget(kind) end
+CreateFromMixins = function() return {} end
+MapCanvasDataProviderMixin = {}
+ns.Media = { icon = "WorldPaneIcon", tex = "WorldPaneTextures\\" }
+ns.Look = { Font = function(_, font) return font end }
+module.db = {}
+for key, value in pairs(module.defaults) do module.db[key] = value end
+module.ViewNow = function() return nil, nil, 2 end
+
+local actualMap = setmetatable({ ScrollContainer = scroll }, { __index = worldMap })
+module:SetupVisual(actualMap)
+assert(actualMap.provider, "visual setup must register its map data provider")
+
+print("OK: visual layer initializes against the Retail UI contract")
+

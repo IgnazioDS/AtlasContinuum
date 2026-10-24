@@ -975,7 +975,16 @@ local function Setup()
 	map:AddDataProvider(dp)
 
 	if mod.SetupExtras then mod:SetupExtras(map) end
-	if mod.SetupVisual then mod:SetupVisual(map) end
+	if mod.SetupVisual then
+		-- Presentation is deliberately non-critical. A bad client-specific texture
+		-- operation must never prevent the stitched map, quests, or navigation from
+		-- finishing their setup.
+		local ok, err = pcall(mod.SetupVisual, mod, map)
+		if not ok then
+			ns:Print("|cffff6060visual layer failed|r: %s", tostring(err):sub(1, 300))
+			geterrorhandler()(err)
+		end
+	end
 	if mod.SetupRegional then
 		mod:SetupRegional(map, fl:GetValidFrameLevel("PIN_FRAME_LEVEL_WORLDPANE_STITCH"), ART_RANGE)
 	end
