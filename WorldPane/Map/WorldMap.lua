@@ -255,6 +255,7 @@ local function OpenNativeMap(mapID)
 	if not ok then geterrorhandler()(err) return false end
 	return true
 end
+mod.OpenRegionalMap = OpenNativeMap
 
 local function OpenParentMap()
 	-- The hosted map may still be a zone for a fraction of a second after the stitched view reaches
@@ -610,6 +611,7 @@ local function OnCreateZoomLevels(self)
 		if mod.BuildSketch then mod:BuildSketch() end
 		if mod.BuildNav then mod:BuildNav() end
 		if mod.BuildMapPins then mod:BuildMapPins() end
+		if mod.BuildRegionalLinks then mod:BuildRegionalLinks() end
 		mod:Refresh()
 	end
 	Attach(self.mapID)
@@ -759,10 +761,12 @@ local function OnCanvasClick(_, button)
 		DropAtCursor()
 		return true
 	end
-	local u, v = mod.CursorWorld()
+	local u, v, pu, pv = mod.CursorWorld()
 	local _, _, zoom = View()
 	local chain = S.ChainAt(u, v)
 	if button == "LeftButton" then
+		local linked = ns.MapRegions and ns.MapRegions.AwayLinkAt(u, v, pu, pv)
+		if linked then OpenNativeMap(linked) return true end
 		-- Detached zones can appear as medallions on Azeroth while their detailed art belongs to another
 		-- world space. Resolve those before the stitched chain: a detached child has no rectangle by
 		-- definition, so it can never be appended to S.ChainAt.
@@ -826,6 +830,10 @@ local function OnBlizzardPinAction(_, action, button)
 	if active and action == MapCanvasMixin.MouseAction.Click and (button == "LeftButton" or button == "RightButton") then
 		local away = ns.ClientMaps and ns.ClientMaps.awayMaps
 		local target = ns.MapRegions and ns.MapRegions.LinkedAwayMap(map:GetHoveredPin(), away)
+		if not target and ns.MapRegions then
+			local u, v, pu, pv = mod.CursorWorld()
+			target = ns.MapRegions.AwayLinkAt(u, v, pu, pv)
+		end
 		if target then OpenNativeMap(target) return true end
 	end
 	return false

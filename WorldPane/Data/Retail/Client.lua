@@ -21,6 +21,15 @@ ns.ClientMaps = {
 	-- separate world spaces. Clicking them leaves the stitched Azeroth canvas and opens Blizzard's native
 	-- map; backing out returns through the normal cosmic/world navigation.
 	awayMaps = { [2405] = true, [2413] = true }, -- Voidstorm, Harandar
+	-- UiMapLink rectangles on Quel'Thalas (2537), from Retail's UiMapLink table. C_Map exposes their
+	-- centres at runtime; these bounds make the complete painted medallions clickable and are also a
+	-- fallback if a future client temporarily omits the runtime MapLink pins.
+	awayLinks = {
+		[2537] = {
+			{ mapID = 2405, minX = 0.435, minY = 0.065, maxX = 0.630, maxY = 0.400 }, -- Voidstorm
+			{ mapID = 2413, minX = 0.730, minY = 0.035, maxX = 0.905, maxY = 0.300 }, -- Harandar
+		},
+	},
 	-- New Quel'Thalas zone art owns its overlap with legacy Eastern Kingdoms zone rectangles. Higher
 	-- priorities are created later and therefore paint above older overlapping map generations.
 	continentPriority = { [2537] = 10 },

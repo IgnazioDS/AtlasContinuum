@@ -10,7 +10,7 @@ API, inter-addon protocol, validation, packaging, and support workflow.
 
 ## Current beta
 
-- Version `0.1.1-beta.1`; Retail interface `120105`.
+- Version `0.1.1-beta.2`; Retail interface `120105`.
 - Cross-zone active quest markers preserve watched, super-tracked, ready,
   campaign, recurring, legendary, calling, important, and meta treatments.
 - Objective progress, focused-quest filtering, rich tooltips, marker controls,

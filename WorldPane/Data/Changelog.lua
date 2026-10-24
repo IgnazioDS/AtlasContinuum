@@ -3,6 +3,13 @@
 local _, ns = ...
 
 ns.MapChangelog = {
+	{ version = "0.1.1-beta.2", date = "2026-10-24", heads = {
+		[1] = "Detached links",
+	}, items = {
+		"|cff6e2c0aVoidstorm and Harandar|r now use their actual Retail UiMapLink rectangles instead of child-zone rectangle inference.",
+		"The complete painted medallions are clickable at every stitched zoom, with a WorldPane-owned centre target and a live-client API fallback.",
+		"Clicks received by either the stitched canvas or Blizzard's native pins now share the same direct transition into each detailed regional map.",
+	} },
 	{ version = "0.1.1-beta.1", date = "2026-10-23", heads = {
 		[1] = "Every world",
 		[4] = "Detached zones",

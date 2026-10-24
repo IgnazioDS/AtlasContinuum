@@ -17,7 +17,8 @@ local children = {
 
 C_Map = {
 	GetMapInfo = function(mapID)
-		if mapID == 2413 then return { mapID = mapID, name = "Harandar", mapType = Enum.UIMapType.Zone } end
+		if mapID == 2405 then return { mapID = mapID, name = "Voidstorm", mapType = Enum.UIMapType.Zone, parentMapID = 2537 } end
+		if mapID == 2413 then return { mapID = mapID, name = "Harandar", mapType = Enum.UIMapType.Zone, parentMapID = 2537 } end
 	end,
 	GetMapInfoAtPosition = function(mapID)
 		return positions[mapID]
@@ -32,6 +33,13 @@ C_Map = {
 		assert(mapType == Enum.UIMapType.Zone)
 		assert(recursive == false)
 		return children[mapID] or {}
+	end,
+	GetMapLinksForMap = function(mapID)
+		if mapID ~= 2537 then return {} end
+		return {
+			{ linkedUiMapID = 2405, name = "Voidstorm", atlasName = "voidstorm",
+				position = { GetXY = function() return 0.54, 0.23 end } },
+		}
 	end,
 }
 
@@ -57,6 +65,25 @@ assert(regions.LinkedAwayMap(linkPin, { [2413] = true }) == 2413,
 	"a detached MapLink pin must resolve its linked native map")
 assert(regions.LinkedAwayMap(linkPin, { [2405] = true }) == nil,
 	"an ordinary or unlisted MapLink pin must retain Blizzard's behavior")
+
+local configuredLinks = {
+	[2537] = {
+		{ mapID = 2405, minX = 0.435, minY = 0.065, maxX = 0.630, maxY = 0.400 },
+		{ mapID = 2413, minX = 0.730, minY = 0.035, maxX = 0.905, maxY = 0.300 },
+	},
+}
+local links = regions.AwayLinks({ [2405] = true, [2413] = true }, configuredLinks, function(mapID)
+	if mapID == 2537 then return 0.75, 1, 0, 0.5 end
+end)
+assert(#links == 2, "runtime and fallback UiMapLink records must produce both detached destinations")
+assert(links[1].mapID == 2405 and math.abs(links[1].u - 0.883125) < 0.00001,
+	"the configured MapLink centre must be translated into stitched-world coordinates")
+assert(links[2].mapID == 2413 and links[2].u0 and links[2].v1,
+	"a destination absent from the runtime list must retain its configured full link rectangle")
+assert(regions.AwayLinkAt(links[1].u0 + 0.001, links[1].v0 + 0.001, nil, nil, links) == 2405,
+	"clicking anywhere in Voidstorm's painted medallion must open Voidstorm")
+assert(regions.AwayLinkAt(links[2].u, links[2].v, 0.001, 0.001, links) == 2413,
+	"the centre hit fallback must open Harandar")
 
 local zones = regions.ZoneRects(101)
 assert(#zones == 2, "regional discovery must ignore child maps without a root rectangle")

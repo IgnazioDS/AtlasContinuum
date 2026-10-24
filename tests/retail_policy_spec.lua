@@ -7,6 +7,8 @@ local policy = assert(ns.ClientMaps, "Retail client policy was not loaded")
 assert(policy.cityMiniOf[2393] == 0, "Silvermoon must not receive the outdoor minimap overlay")
 assert(policy.awayMaps[2405] == true, "Voidstorm must open as a native map")
 assert(policy.awayMaps[2413] == true, "Harandar must open as a native map")
+assert(policy.awayLinks[2537][1].mapID == 2405 and policy.awayLinks[2537][2].mapID == 2413,
+	"Quel'Thalas must retain complete clickable bounds for both detached map links")
 assert((policy.continentPriority[2537] or 0) > 0, "Quel'Thalas must paint above legacy Eastern Kingdoms zones")
 
 print("OK: Retail detached-map and visual-layer policy")

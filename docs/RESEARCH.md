@@ -22,7 +22,10 @@ map rectangles intersect.
 3. Non-Azeroth continents stay on their native canvas but gain dynamically
    discovered zone previews and deeper zoom levels.
 4. Detached zones without a parent rectangle, including map-link medallions,
-   transition directly to their detailed native canvas.
+   transition directly to their detailed native canvas. Their `UiMapLink`
+   rectangles are navigation portals rather than zone geometry, so WorldPane
+   resolves their live link centres and retains complete client-specific hit
+   bounds instead of feeding them into the stitched child-map hierarchy.
 5. Zooming or navigating outward from the fitted Azeroth view reaches the
    cosmic map, where Outland, Draenor, and other worlds remain selectable.
 6. Back, right-click, Escape, breadcrumbs, and gamepad actions must preserve a

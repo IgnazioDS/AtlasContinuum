@@ -64,6 +64,88 @@ function R.LinkedAwayMap(pin, awayMaps)
 	return mapID and awayMaps[mapID] and mapID or nil
 end
 
+local function PositionXY(position)
+	if not position then return end
+	if type(position.GetXY) == "function" then return SafeCall(position.GetXY, position) end
+	return position.x or position[1], position.y or position[2]
+end
+
+-- Map links are not children with rectangles: they are portals painted into a parent map. Resolve the
+-- live API's link centres into stitched-world coordinates and enrich them with the client's full link
+-- rectangles. The static rectangles are intentionally only a fallback/pointer hit area; names and atlas
+-- art continue to come from the live client.
+function R.AwayLinks(awayMaps, configured, rectFn)
+	if not awayMaps then return {} end
+	rectFn = rectFn or S.Rect
+	local links, byTarget, parents = {}, {}, {}
+
+	for mapID in pairs(awayMaps) do
+		local info = SafeCall(C_Map.GetMapInfo, mapID)
+		if info and info.parentMapID and info.parentMapID ~= 0 then parents[info.parentMapID] = true end
+	end
+	for parentMapID in pairs(configured or {}) do parents[parentMapID] = true end
+
+	local function Add(parentMapID, mapID, x, y, name, atlasName)
+		if not (awayMaps[mapID] and x and y) then return end
+		local l, r, t, b = rectFn(parentMapID)
+		if not l then return end
+		local link = byTarget[mapID]
+		if not link then
+			local mapInfo = SafeCall(C_Map.GetMapInfo, mapID)
+			link = { mapID = mapID, parentMapID = parentMapID }
+			links[#links + 1], byTarget[mapID] = link, link
+			link.name = name or (mapInfo and mapInfo.name)
+		end
+		link.u, link.v = l + x * (r - l), t + y * (b - t)
+		link.atlasName = atlasName or link.atlasName
+		return link, l, r, t, b
+	end
+
+	for parentMapID in pairs(parents) do
+		for _, info in ipairs(SafeCall(C_Map.GetMapLinksForMap, parentMapID) or {}) do
+			local x, y = PositionXY(info.position)
+			Add(parentMapID, info.linkedUiMapID, x, y, info.name, info.atlasName)
+		end
+	end
+
+	for parentMapID, entries in pairs(configured or {}) do
+		for _, entry in ipairs(entries) do
+			local x = entry.x or (entry.minX and entry.maxX and (entry.minX + entry.maxX) / 2)
+			local y = entry.y or (entry.minY and entry.maxY and (entry.minY + entry.maxY) / 2)
+			local link, l, r, t, b = Add(parentMapID, entry.mapID or entry[1], x, y, entry.name, entry.atlasName)
+			if link and entry.minX and entry.minY and entry.maxX and entry.maxY then
+				link.u0, link.u1 = l + entry.minX * (r - l), l + entry.maxX * (r - l)
+				link.v0, link.v1 = t + entry.minY * (b - t), t + entry.maxY * (b - t)
+			end
+		end
+	end
+
+	table.sort(links, function(a, b) return a.mapID < b.mapID end)
+	return links
+end
+
+R.links = {}
+
+-- Hit the real UiMapLink rectangle first. The pixel-radius fallback also covers live-only future links
+-- that have a centre but no client policy bounds yet.
+function R.AwayLinkAt(u, v, pxU, pxV, links, reach)
+	if not (u and v) then return end
+	links, reach = links or R.links, reach or 48
+	for _, link in ipairs(links or {}) do
+		if link.u0 and u >= link.u0 and u <= link.u1 and v >= link.v0 and v <= link.v1 then
+			return link.mapID
+		end
+	end
+	if not (pxU and pxV and pxU > 0 and pxV > 0) then return end
+	local best, bestD = nil, reach * reach
+	for _, link in ipairs(links or {}) do
+		local dx, dy = (u - link.u) / pxU, (v - link.v) / pxV
+		local d = dx * dx + dy * dy
+		if d < bestD then best, bestD = link.mapID, d end
+	end
+	return best
+end
+
 -- Direct zone children are the stable, visible generation for a continent.
 -- Recursive discovery is only a fallback for unusual roots that insert an
 -- intermediate map in their UI hierarchy.
@@ -113,6 +195,7 @@ end
 
 local map, sc, canvas, root, artLevel, levelRange
 local zonePool, activeZones = {}, 0
+local linkSet
 local currentRoot, previewing
 local stats = { root = 0, zones = 0, textures = 0 }
 R.stats = stats
@@ -306,6 +389,33 @@ local function ExtendZoomLevels(self)
 		levels[#levels + 1] = { scale = scale, layerIndex = last.layerIndex or 1 }
 	end
 	self.baseScale = base
+end
+
+function mod:BuildRegionalLinks()
+	local policy = ns.ClientMaps
+	if not (policy and policy.awayMaps and S.PinSet and S.AddPin) then return end
+	R.links = R.AwayLinks(policy.awayMaps, policy.awayLinks, S.Rect)
+	linkSet = linkSet or S.PinSet("regionalLinks", 0, 5)
+	S.ClearPinSet(linkSet)
+	for _, link in ipairs(R.links) do
+		-- The destination is already painted as a large medallion in Quel'Thalas art. This transparent
+		-- WorldPane button owns its centre and provides a tooltip; AwayLinkAt owns the whole painted area.
+		local pin = S.AddPin(linkSet, link.u, link.v,
+			{ texture = "Interface\\Buttons\\WHITE8x8", size = 64, color = { 1, 1, 1, 0 } }, link)
+		pin.Icon:SetAlpha(0)
+		pin.Highlight:SetAlpha(0)
+		local mapID, name = link.mapID, link.name
+		pin.OnClick = function()
+			if mod.OpenRegionalMap then mod.OpenRegionalMap(mapID) end
+		end
+		pin:SetScript("OnEnter", function(self)
+			if not GameTooltip then return end
+			GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+			GameTooltip:SetText(name or tostring(mapID), 1, 0.82, 0)
+			GameTooltip:Show()
+		end)
+		pin:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
+	end
 end
 
 function mod:SetupRegional(worldMap, stitchArtLevel, stitchRange)
