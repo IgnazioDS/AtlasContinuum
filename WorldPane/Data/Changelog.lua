@@ -3,6 +3,18 @@
 local _, ns = ...
 
 ns.MapChangelog = {
+	{ version = "0.3.0-beta.1", date = "2026-10-24", heads = {
+		[1] = "Adaptive map HUD",
+		[5] = "Interface system",
+	}, items = {
+		"|cff6e2c0aResponsive map context|r now adapts between compact, standard, and wide layouts while preserving the current map type, title, nearest hierarchy, and logarithmic zoom depth.",
+		"Map changes use a staged entrance, readable hold, and soft exit instead of appearing as an abrupt title flash.",
+		"Zoom-reactive edge depth, restrained parchment grain, a fine bronze boundary, and precise corner marks frame mixed-era map artwork without obscuring it.",
+
+		"|cff6e2c0aOne component language|r now governs navigation tabs, settings rows, coordinate pills, map search, focus states, dividers, and selection feedback.",
+		"The place finder gains a purpose-built WorldPane field, clear action, focused border, and calmer result highlights.",
+		"The presentation contract now tests responsive geometry, map-depth labels, compressed hierarchy, transition stages, token relationships, and Retail initialization.",
+	} },
 	{ version = "0.2.0-beta.2", date = "2026-10-24", heads = {
 		[1] = "Visual startup",
 	}, items = {

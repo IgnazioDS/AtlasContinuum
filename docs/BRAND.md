@@ -26,8 +26,9 @@ it for the current Retail build.
 - Accent: parchment gold `#E6B85C`.
 - Supporting tones: ink brown, charcoal, warm parchment, restrained quest gold.
 - Icon: the existing gold compass over a parchment map; no legacy initials.
-- UI: preserve Blizzard's map language while improving hierarchy, alignment,
-  transitions, and information density.
+- UI: preserve Blizzard's map language while using responsive hierarchy,
+  restrained staged motion, precise alignment, strong focus states, and
+  consistent component feedback.
 
 Use the bundled legal sentence only where provenance is required. Marketing
 copy should otherwise describe WorldPane on its own merits.

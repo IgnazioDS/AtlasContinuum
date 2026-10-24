@@ -10,13 +10,15 @@ API, inter-addon protocol, validation, packaging, and support workflow.
 
 ## Current beta
 
-- Version `0.2.0-beta.2`; Retail interface `120105`.
-- A cohesive obsidian, parchment, bronze, and gold visual system now covers the
-  map chrome, menus, tool windows, information pills, and action states.
-- A contextual map header shows the current hierarchy and live zoom depth;
-  short transitions make movement between worlds, continents, and zones clear.
-- Optional edge atmosphere and subtle parchment grain visually unify map art
-  from different World of Warcraft eras.
+- Version `0.3.0-beta.1`; Retail interface `120105`.
+- A responsive map HUD adapts to compact, standard, and wide windows while
+  preserving map type, title, hierarchy, and live logarithmic zoom depth.
+- Map changes use a staged entrance, readable hold, and soft exit; optional
+  zoom-reactive edge atmosphere and parchment grain unify map art from
+  different World of Warcraft eras.
+- A token-driven obsidian, parchment, bronze, and gold component system covers
+  map chrome, menus, tabs, search, coordinate pills, settings, and interaction
+  states with consistent focus, hover, and selection feedback.
 - Cross-zone active quest markers preserve watched, super-tracked, ready,
   campaign, recurring, legendary, calling, important, and meta treatments.
 - Objective progress, focused-quest filtering, rich tooltips, marker controls,

@@ -23,11 +23,20 @@ menus, tool windows, information pills, and action tiles. The default language
 uses obsidian surfaces, parchment text, bronze structure, and a restrained gold
 accent so map artwork remains the visual focus.
 
-A non-interactive canvas overlay supplies a compact context header, zoom-depth
-feedback, edge atmosphere, subtle grain, and short map-title transitions. Each
-effect can be disabled independently and none of them owns clicks, map state,
-or navigation. This keeps presentation changes reversible and prevents visual
-polish from changing map behavior.
+A non-interactive canvas overlay supplies an adaptive context HUD, logarithmic
+zoom feedback, edge atmosphere, subtle grain, and staged map-title transitions.
+The HUD has compact, standard, and wide contracts with an intentional maximum
+measure, progressively compressed breadcrumbs, and stable zoom controls. Map
+changes use entrance, hold, and exit phases so context is readable without
+delaying navigation. Each effect can be disabled independently and none owns
+clicks, map state, or navigation. This keeps presentation changes reversible
+and prevents visual polish from changing map behavior.
+
+Interactive components share explicit default, hover, selected, focused, and
+disabled states. Navigation tabs, checklist rows, coordinate pills, and place
+search consume the same semantic tokens rather than inheriting unrelated
+Blizzard art from different interface generations. The atmosphere intensity is
+adjustable independently from the map artwork.
 
 ## Navigation hierarchy
 

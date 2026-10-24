@@ -14,7 +14,7 @@
 local _, ns = ...
 local S = ns.MapStitch
 local mod = ns:GetModule("worldmap")
-local Look, Safe, L = ns.Look, ns.Safe, ns.L
+local Look, Safe, L, Theme = ns.Look, ns.Safe, ns.L, ns.Theme
 
 local d = mod.defaults
 d.group = true
@@ -341,13 +341,21 @@ local function ShowResults()
 		local row = list.rows[i]
 		if not row then
 			row = CreateFrame("Button", nil, list)
-			row:SetSize(220, 18)
-			row:SetPoint("TOPLEFT", list.pad[1], -list.pad[2] - (i - 1) * 18)
-			row:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight", "ADD")
+			row:SetSize(220, 22)
+			row:SetPoint("TOPLEFT", list.pad[1], -list.pad[2] - (i - 1) * 22)
+			row.hover = row:CreateTexture(nil, "BACKGROUND")
+			row.hover:SetAllPoints()
+			row.hover:SetColorTexture(Theme.semantic.accent[1], Theme.semantic.accent[2], Theme.semantic.accent[3], 0.13)
+			row.hover:Hide()
 			row.name = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-			row.name:SetPoint("LEFT", 4, 0)
+			row.name:SetPoint("LEFT", 7, 0)
+			Look:Font(row.name, 11)
 			row.kind = row:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-			row.kind:SetPoint("RIGHT", -4, 0)
+			row.kind:SetPoint("RIGHT", -7, 0)
+			Look:Font(row.kind, 9, "OUTLINE")
+			Theme.SetColor(row.kind, "SetTextColor", Theme.semantic.textSubtle)
+			row:SetScript("OnEnter", function(self) self.hover:Show() end)
+			row:SetScript("OnLeave", function(self) self.hover:Hide() end)
 			row:SetScript("OnClick", function(self) Go(self.place) end)
 			list.rows[i] = row
 		end
@@ -356,7 +364,7 @@ local function ShowResults()
 		row.kind:SetText(found[i][1].kind)
 		row:Show()
 	end
-	list:SetHeight(list.pad[2] + list.pad[4] + math.min(#found, MAX_RESULTS) * 18)
+	list:SetHeight(list.pad[2] + list.pad[4] + math.min(#found, MAX_RESULTS) * 22)
 	list:Show()
 	list.first = found[1][1]
 end
@@ -364,10 +372,44 @@ end
 -- the search box, on `parent` (the map's menu), `width` wide; its results drop down below it
 function mod.CreateSearch(parent, width)
 	map = map or _G.WorldMapFrame
-	box = CreateFrame("EditBox", nil, parent, "SearchBoxTemplate")
-	box:SetSize(width, 22)
+	box = CreateFrame("EditBox", nil, parent, "BackdropTemplate")
+	box:SetSize(width, 26)
 	box:SetAutoFocus(false)
-	if box.Instructions then box.Instructions:SetText(L["Find a place"]) end
+	box:SetFontObject(GameFontHighlightSmall)
+	box:SetTextInsets(30, 28, 0, 0)
+	box:SetTextColor(Theme.semantic.text[1], Theme.semantic.text[2], Theme.semantic.text[3], 1)
+	Theme.Backdrop(box, {
+		background = Theme.component.menu.backgroundRaised,
+		border = Theme.semantic.borderQuiet,
+	}, 0.96)
+
+	local icon = box:CreateTexture(nil, "ARTWORK")
+	icon:SetSize(14, 14)
+	icon:SetPoint("LEFT", 9, 0)
+	icon:SetTexture("Interface\\Icons\\INV_Misc_Spyglass_03")
+	icon:SetTexCoord(0.12, 0.88, 0.12, 0.88)
+	icon:SetDesaturated(true)
+	Theme.SetColor(icon, "SetVertexColor", Theme.semantic.accentMuted)
+
+	local instructions = box:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+	instructions:SetPoint("LEFT", 30, 0)
+	instructions:SetText(L["Find a place"])
+	Look:Font(instructions, 10)
+	Theme.SetColor(instructions, "SetTextColor", Theme.semantic.textSubtle)
+
+	local clear = CreateFrame("Button", nil, box)
+	clear:SetSize(24, 24)
+	clear:SetPoint("RIGHT", -2, 0)
+	clear.glyph = clear:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+	clear.glyph:SetPoint("CENTER", 0, 1)
+	clear.glyph:SetText("×")
+	Look:Font(clear.glyph, 15)
+	Theme.SetColor(clear.glyph, "SetTextColor", Theme.semantic.textMuted)
+	clear:SetScript("OnEnter", function(self) Theme.SetColor(self.glyph, "SetTextColor", Theme.semantic.accentBright) end)
+	clear:SetScript("OnLeave", function(self) Theme.SetColor(self.glyph, "SetTextColor", Theme.semantic.textMuted) end)
+	clear:SetScript("OnClick", function() box:SetText("") box:SetFocus() end)
+	clear:Hide()
+
 	list = CreateFrame("Frame", nil, parent)
 	list:SetPoint("TOPLEFT", box, "BOTTOMLEFT", -6, -2)
 	list:SetWidth(240)
@@ -375,10 +417,23 @@ function mod.CreateSearch(parent, width)
 	list:EnableMouse(true)
 	list.pad = { Look:Dropdown(list) }              -- (the game's own dropdowns' look)
 	list:Hide()
-	box:HookScript("OnTextChanged", ShowResults)
+	box:SetScript("OnTextChanged", function(self)
+		local hasText = self:GetText() ~= ""
+		instructions:SetShown(not hasText and not self:HasFocus())
+		clear:SetShown(hasText)
+		ShowResults()
+	end)
+	box:SetScript("OnEditFocusGained", function()
+		instructions:Hide()
+		Theme.SetColor(box, "SetBackdropBorderColor", Theme.semantic.borderBright)
+	end)
 	box:SetScript("OnEnterPressed", function() if list:IsShown() and list.first then Go(list.first) else box:ClearFocus() end end)
-	box:HookScript("OnEscapePressed", function() list:Hide() end)
-	box:HookScript("OnEditFocusLost", function() C_Timer.After(0.2, function() if not box:HasFocus() then list:Hide() end end) end)
+	box:SetScript("OnEscapePressed", function(self) self:ClearFocus() list:Hide() end)
+	box:SetScript("OnEditFocusLost", function(self)
+		instructions:SetShown(self:GetText() == "")
+		Theme.SetColor(self, "SetBackdropBorderColor", Theme.semantic.borderQuiet)
+		C_Timer.After(0.2, function() if not box:HasFocus() then list:Hide() end end)
+	end)
 	map:HookScript("OnHide", function() box:ClearFocus() list:Hide() end)
 	return box
 end

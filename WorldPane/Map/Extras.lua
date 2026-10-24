@@ -155,7 +155,7 @@ end
 -- (right-aligned, a fixed width: moving the mouse changes the numbers, never the pill's size)
 local function Pill(parent, label)
 	local pill = CreateFrame("Frame", nil, parent, "BackdropTemplate")
-	pill:SetHeight(24)
+	pill:SetHeight(26)
 	pill:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8", edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
 	local spec = theme and theme.component.infoPill
 	local bg = spec and spec.background or { 0, 0, 0, 1 }
@@ -166,17 +166,34 @@ local function Pill(parent, label)
 	shadow:SetPoint("TOPLEFT", -3, 3)
 	shadow:SetPoint("BOTTOMRIGHT", 3, -3)
 	shadow:SetColorTexture(0, 0, 0, 0.30)
-	local fs = pill:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-	fs:SetPoint("LEFT", 10, 0)
-	ns.Look:Font(fs, 12)
 	local labelColor = spec and spec.label or { 1, 0.82, 0, 1 }
+	local accentColor = spec and spec.accent or labelColor
+	local accent = pill:CreateTexture(nil, "ARTWORK")
+	accent:SetPoint("TOPLEFT", 1, -1)
+	accent:SetPoint("BOTTOMLEFT", 1, 1)
+	accent:SetWidth(2)
+	accent:SetColorTexture(accentColor[1], accentColor[2], accentColor[3], 0.90)
+	local top = pill:CreateTexture(nil, "ARTWORK")
+	top:SetPoint("TOPLEFT", 3, -1)
+	top:SetPoint("TOPRIGHT", -1, -1)
+	top:SetHeight(1)
+	top:SetColorTexture(accentColor[1], accentColor[2], accentColor[3], 0.16)
+	local dividerColor = spec and spec.divider or edge
+	local divider = pill:CreateTexture(nil, "ARTWORK")
+	divider:SetPoint("TOPRIGHT", -NUMBERS - 5, -5)
+	divider:SetPoint("BOTTOMRIGHT", -NUMBERS - 5, 5)
+	divider:SetWidth(1)
+	divider:SetColorTexture(dividerColor[1], dividerColor[2], dividerColor[3], 0.72)
+	local fs = pill:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+	fs:SetPoint("LEFT", 11, 0)
+	ns.Look:Font(fs, 11, "OUTLINE")
 	fs:SetTextColor(labelColor[1], labelColor[2], labelColor[3], 1)
 	fs:SetText(label or "")
 	fs.at = pill:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-	fs.at:SetPoint("RIGHT", -10, 0)
+	fs.at:SetPoint("RIGHT", -8, 0)
 	fs.at:SetWidth(NUMBERS)
 	fs.at:SetJustifyH("RIGHT")
-	ns.Look:Font(fs.at, 12)
+	ns.Look:Font(fs.at, 11, "OUTLINE")
 	if spec and spec.value then fs.at:SetTextColor(spec.value[1], spec.value[2], spec.value[3], 1) end
 	return pill, fs
 end
@@ -213,14 +230,14 @@ end
 local function SetUpCoords()
 	if not bar then
 		bar = CreateFrame("Frame", nil, sc)
-		bar:SetSize(1, 22)
+		bar:SetSize(1, 26)
 		bar:SetFrameLevel(math.min(sc:GetFrameLevel() + 9000, 9900))   -- above every map pin
 		-- (yours at the right, steady; the cursor's comes in to its left while over the map)
 		local playerPill, cursorPill
 		playerPill, bar.player = Pill(bar, PLAYER)
 		playerPill:SetPoint("RIGHT")
 		cursorPill, bar.cursor = Pill(bar)
-		cursorPill:SetPoint("RIGHT", playerPill, "LEFT", -6, 0)
+		cursorPill:SetPoint("RIGHT", playerPill, "LEFT", -8, 0)
 		bar:SetScript("OnUpdate", UpdateCoords)
 		PlaceCoords()
 		map:HookScript("OnShow", function() PlaceCoords() C_Timer.After(0, PlaceCoords) end)

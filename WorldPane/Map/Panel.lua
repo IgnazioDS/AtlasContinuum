@@ -440,6 +440,46 @@ local function Rule(parent)
 	return t
 end
 
+-- A WorldPane-native navigation tab. Using one component in every client avoids
+-- mixing several generations of Blizzard tab art inside the same menu.
+local function MenuTab(parent, label)
+	local b = CreateFrame("Button", nil, parent, "BackdropTemplate")
+	b:SetHeight(26)
+	local spec = theme and theme.component.navTab
+	local face = spec and spec.background or { 0.03, 0.027, 0.024, 0.96 }
+	local edge = spec and spec.border or BRONZE
+	b:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8", edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
+	b:SetBackdropColor(face[1], face[2], face[3], face[4] or 0.96)
+	b:SetBackdropBorderColor(edge[1], edge[2], edge[3], 0.88)
+	b.Text = b:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+	ns.Look:Font(b.Text, 11, "OUTLINE")
+	b.Text:SetPoint("CENTER")
+	b.Text:SetText(label)
+	local hover = b:CreateTexture(nil, "HIGHLIGHT")
+	hover:SetPoint("TOPLEFT", 1, -1)
+	hover:SetPoint("BOTTOMRIGHT", -1, 1)
+	local hoverColor = spec and spec.backgroundHover or { 0.09, 0.07, 0.05, 1 }
+	hover:SetColorTexture(hoverColor[1], hoverColor[2], hoverColor[3], 0.72)
+	b.selection = b:CreateTexture(nil, "ARTWORK")
+	b.selection:SetPoint("BOTTOMLEFT", 5, 1)
+	b.selection:SetPoint("BOTTOMRIGHT", -5, 1)
+	b.selection:SetHeight(2)
+	b.selection:SetColorTexture(LIT[1], LIT[2], LIT[3], 0.95)
+	function b:SetSelected(on)
+		local selectedFace = spec and spec.backgroundSelected or { 0.13, 0.10, 0.07, 0.92 }
+		local selectedEdge = spec and spec.borderSelected or LIT
+		local currentFace = on and selectedFace or face
+		local currentEdge = on and selectedEdge or edge
+		local text = on and (spec and spec.textSelected or LIT) or (spec and spec.text or HEAD)
+		self:SetBackdropColor(currentFace[1], currentFace[2], currentFace[3], 0.94)
+		self:SetBackdropBorderColor(currentEdge[1], currentEdge[2], currentEdge[3], on and 0.95 or 0.72)
+		self.Text:SetTextColor(text[1], text[2], text[3], 1)
+		self.selection:SetShown(on)
+	end
+	b:SetSelected(false)
+	return b
+end
+
 local function MakeStar(parent, onChange)
 	local star = CreateFrame("Button", nil, parent)
 	star:SetSize(14, 14)
@@ -892,6 +932,7 @@ Fill = function()
 				local it = checks.heads[nh]
 				if not it then
 					it = checks:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+					ns.Look:Font(it, 11, "OUTLINE")
 					it:SetTextColor(HEAD[1], HEAD[2], HEAD[3])
 					it.rule = Rule(checks)
 					it.rule:SetPoint("LEFT", it, "RIGHT", 6, 0)
@@ -916,12 +957,15 @@ Fill = function()
 					it.icon:SetPoint("LEFT", it, "RIGHT", 4, 0)
 					it.border = IconBorder(checks, it.icon, 16)   -- (spell icons only: map symbols go bare)
 					it.label = checks:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+					ns.Look:Font(it.label, 11)
 					it.label:SetPoint("LEFT", it.icon, "RIGHT", 6, 0)
 					-- the whole line clicks the box
 					it.hit = CreateFrame("Button", nil, checks)
 					it.hit:SetHeight(ROW_H)
 					it.hit:SetPoint("LEFT", it.icon, "LEFT", -2, 0)
-					it.hit:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight", "ADD")
+					local hover = it.hit:CreateTexture(nil, "HIGHLIGHT")
+					hover:SetAllPoints()
+					hover:SetColorTexture(LIT[1], LIT[2], LIT[3], 0.075)
 					it.hit:SetScript("OnClick", function() it:Click() end)
 					it.star = MakeStar(checks, function() Fill() RefreshFavorites() end)
 					checks.boxes[nb] = it
@@ -1265,19 +1309,12 @@ function mod:SetupPanel(worldMap)
 	end
 	y = y - math.floor((#actions - 1) / perRow) * (TILE_H + gap) - TILE_H - 14
 
-	-- the checklist's tabs (the game's own settings tabs, where the client has them), a rule under them
+	-- the checklist's tabs: one stable visual language across Retail builds
 	menu.tabs = {}
 	local tx = PAD
 	for i, t in ipairs(TABS) do
-		local ok, b = pcall(CreateFrame, "Button", nil, menu, "MinimalTabTemplate")
-		if ok and b and b.Text then
-			b.Text:SetText(t.name)
-			b:SetWidth(math.max(84, b.Text:GetStringWidth() + 40))
-		else
-			b = CreateFrame("Button", nil, menu, "UIPanelButtonTemplate")
-			b:SetSize(100, 22)
-			b:SetText(t.name)
-		end
+		local b = MenuTab(menu, t.name)
+		b:SetWidth(math.max(92, b.Text:GetStringWidth() + 36))
 		b.key = t.key
 		b:SetPoint("BOTTOMLEFT", menu, "TOPLEFT", tx, y - 32)
 		b:SetScript("OnClick", function()
@@ -1307,6 +1344,7 @@ function mod:SetupPanel(worldMap)
 	sliders:SetWidth(inner)
 	local function Head(text, x)
 		local head = sliders:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+		ns.Look:Font(head, 11, "OUTLINE")
 		head:SetTextColor(HEAD[1], HEAD[2], HEAD[3])
 		head:SetPoint("TOPLEFT", x + 2, 0)
 		head:SetText(text)
@@ -1342,6 +1380,7 @@ function mod:SetupPanel(worldMap)
 	menu.extraRows[#menu.extraRows + 1] = made.icons
 	for _, s in ipairs({
 		{ "windowScale", L["Map size"], Icon("INV_Misc_Spyglass_02") },
+		{ "visualIntensity", L["Atmosphere"], Icon("Spell_Shadow_Twilight") },
 		{ "colorMatch", L["Colour matching"], Icon("INV_Misc_Map_01") },
 		{ "desaturate", L["Take colour out"], Icon("Spell_Shadow_Twilight") },
 		{ "minimapMix", L["Minimap strength"], Icon("Spell_Nature_FarSight") },
@@ -1361,7 +1400,7 @@ function mod:SetupPanel(worldMap)
 	end
 	-- each column's, top down
 	local height = 0
-	for col, list in ipairs({ { "zoom", "icons", "windowScale", "colorMatch", "desaturate" }, { "from", "minimapMix", "opacity", "moveFade", "mapFpsCap" } }) do
+	for col, list in ipairs({ { "zoom", "icons", "windowScale", "visualIntensity", "colorMatch", "desaturate" }, { "from", "minimapMix", "opacity", "moveFade", "mapFpsCap" } }) do
 		local y = -22
 		for _, key in ipairs(list) do
 			local r = made[key]
